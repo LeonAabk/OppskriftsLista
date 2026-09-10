@@ -171,8 +171,15 @@ function fetchRecipes() {
 function renderRecipes(recipes) {
     el.recipeGrid.innerHTML = '';
 
+    const allRecipes = getRecipesFromStorage();
+
+    if (allRecipes.length === 0) {
+        el.dashboardEmpty.style.display = 'flex';
+    } else {
+        el.dashboardEmpty.style.display = 'none';
+    }
+
     if (recipes.length === 0) {
-        el.dashboardEmpty.style.display = 'block';
         return;
     }
 
