@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Management</title>
+    <title>Oppskriftslista</title>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -22,13 +22,13 @@
     <!-- Header Navigation -->
     <header class="app-header">
         <div class="logo">
-            <h1>RecipeBox</h1>
+            <h1>Oppskriftslista</h1>
         </div>
         <nav class="nav-links">
             <button id="theme-toggle" class="btn-icon" aria-label="Toggle Dark Mode">🌙</button>
             <div id="auth-nav-items">
-                <button id="nav-dashboard" class="nav-btn">Dashboard</button>
-                <button id="nav-add-recipe" class="nav-btn primary">Add Recipe</button>
+                <button id="nav-dashboard" class="nav-btn">Oversikt</button>
+                <button id="nav-add-recipe" class="nav-btn primary">Legg til oppskrift</button>
             </div>
         </nav>
     </header>
@@ -38,23 +38,23 @@
         <!-- 2. Dashboard / Recipe Grid View -->
         <section id="view-dashboard" class="view-section active">
             <div class="dashboard-header">
-                <h2>My Recipes</h2>
+                <h2>Mine oppskrifter</h2>
                 <div class="search-filter-bar">
-                    <input type="text" id="search-input" class="search-input" placeholder="Search recipes or ingredients...">
+                    <input type="text" id="search-input" class="search-input" placeholder="Søk etter oppskrifter eller ingredienser...">
                     <select id="filter-category" class="filter-select">
-                        <option value="">All Categories</option>
-                        <option value="Breakfast">Breakfast</option>
-                        <option value="Lunch">Lunch</option>
-                        <option value="Dinner">Dinner</option>
+                        <option value="">Alle kategorier</option>
+                        <option value="Breakfast">Frokost</option>
+                        <option value="Lunch">Lunsj</option>
+                        <option value="Dinner">Middag</option>
                         <option value="Dessert">Dessert</option>
-                        <option value="Vegan">Vegan</option>
+                        <option value="Vegan">Vegansk</option>
                     </select>
                     <select id="filter-time" class="filter-select">
-                        <option value="">Max Time: Any</option>
-                        <option value="15">Under 15 mins</option>
-                        <option value="30">Under 30 mins</option>
-                        <option value="60">Under 60 mins</option>
-                        <option value="120">Under 2 hours</option>
+                        <option value="">Maks tid: Alle</option>
+                        <option value="15">Under 15 min</option>
+                        <option value="30">Under 30 min</option>
+                        <option value="60">Under 60 min</option>
+                        <option value="120">Under 2 timer</option>
                     </select>
                 </div>
             </div>
@@ -62,9 +62,9 @@
             <div id="recipe-grid" class="recipe-grid">
                 <!-- Recipe Cards will be dynamically injected here -->
             </div>
-            <div id="dashboard-loading" class="loading-spinner" style="display: none;">Loading recipes...</div>
+            <div id="dashboard-loading" class="loading-spinner" style="display: none;">Laster oppskrifter...</div>
             <div id="dashboard-empty" class="empty-state" style="display: none;">
-                <p>No recipes found. Start adding some!</p>
+                <p>Ingen oppskrifter funnet. Legg til din første oppskrift!</p>
             </div>
         </section>
 
@@ -72,8 +72,8 @@
         <!-- 3. Add/Edit Recipe Engine View -->
         <section id="view-recipe-form" class="view-section">
             <div class="form-header">
-                <button id="btn-back-from-form" class="btn-icon">← Back</button>
-                <h2 id="form-view-title">Add New Recipe</h2>
+                <button id="btn-back-from-form" class="btn-icon">← Tilbake</button>
+                <h2 id="form-view-title">Legg til ny oppskrift</h2>
             </div>
 
             <form id="recipe-form" class="recipe-form-card">
@@ -81,56 +81,56 @@
 
                 <div class="form-row">
                     <div class="form-group flex-2">
-                        <label for="recipe-title">Title *</label>
-                        <input type="text" id="recipe-title" required placeholder="E.g., Classic Spaghetti Bolognese">
+                        <label for="recipe-title">Tittel *</label>
+                        <input type="text" id="recipe-title" required placeholder="F.eks., Klassisk Spaghetti Bolognese">
                     </div>
                     <div class="form-group flex-1">
-                        <label for="recipe-difficulty">Difficulty</label>
+                        <label for="recipe-difficulty">Vanskelighetsgrad</label>
                         <select id="recipe-difficulty">
-                            <option value="Easy">Easy</option>
-                            <option value="Medium" selected>Medium</option>
-                            <option value="Hard">Hard</option>
+                            <option value="Easy">Lett</option>
+                            <option value="Medium" selected>Middels</option>
+                            <option value="Hard">Vanskelig</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="recipe-description">Description</label>
-                    <textarea id="recipe-description" rows="3" placeholder="A short description of this delicious recipe..."></textarea>
+                    <label for="recipe-description">Beskrivelse</label>
+                    <textarea id="recipe-description" rows="3" placeholder="En kort beskrivelse av denne deilige oppskriften..."></textarea>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="recipe-prep-time">Prep Time (mins)</label>
+                        <label for="recipe-prep-time">Forberedelsestid (min)</label>
                         <input type="number" id="recipe-prep-time" min="0" placeholder="15">
                     </div>
                     <div class="form-group">
-                        <label for="recipe-cook-time">Cook Time (mins)</label>
+                        <label for="recipe-cook-time">Tilberedningstid (min)</label>
                         <input type="number" id="recipe-cook-time" min="0" placeholder="45">
                     </div>
                     <div class="form-group">
-                        <label for="recipe-servings">Servings</label>
+                        <label for="recipe-servings">Porsjoner</label>
                         <input type="number" id="recipe-servings" min="1" placeholder="4">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="recipe-image">Cover Image (URL or Base64)</label>
+                    <label for="recipe-image">Forsidebilde (URL eller opplasting)</label>
                     <input type="text" id="recipe-image" placeholder="https://example.com/image.jpg">
                     <input type="file" id="recipe-image-upload" accept="image/*" style="margin-top: 8px;">
                 </div>
 
                 <div class="form-group">
-                    <label for="recipe-tags">Tags (comma separated)</label>
-                    <input type="text" id="recipe-tags" placeholder="Dinner, Pasta, Italian">
+                    <label for="recipe-tags">Tagger (kommaseparert)</label>
+                    <input type="text" id="recipe-tags" placeholder="Middag, Pasta, Italiensk">
                 </div>
 
                 <hr class="divider">
 
                 <div class="dynamic-section">
                     <div class="section-header">
-                        <h3>Ingredients</h3>
-                        <button type="button" id="btn-add-ingredient" class="btn-secondary small">+ Add Ingredient</button>
+                        <h3>Ingredienser</h3>
+                        <button type="button" id="btn-add-ingredient" class="btn-secondary small">+ Legg til ingrediens</button>
                     </div>
                     <div id="ingredients-container" class="dynamic-list">
                         <!-- Ingredient rows injected here -->
@@ -141,8 +141,8 @@
 
                 <div class="dynamic-section">
                     <div class="section-header">
-                        <h3>Instructions</h3>
-                        <button type="button" id="btn-add-instruction" class="btn-secondary small">+ Add Step</button>
+                        <h3>Fremgangsmåte</h3>
+                        <button type="button" id="btn-add-instruction" class="btn-secondary small">+ Legg til steg</button>
                     </div>
                     <div id="instructions-container" class="dynamic-list">
                         <!-- Instruction rows injected here -->
@@ -150,8 +150,8 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" id="btn-cancel-form" class="btn-outline">Cancel</button>
-                    <button type="submit" id="btn-save-recipe" class="btn-primary">Save Recipe</button>
+                    <button type="button" id="btn-cancel-form" class="btn-outline">Avbryt</button>
+                    <button type="submit" id="btn-save-recipe" class="btn-primary">Lagre oppskrift</button>
                 </div>
             </form>
         </section>
@@ -160,19 +160,19 @@
         <!-- 4. Detailed Recipe View -->
         <section id="view-recipe-detail" class="view-section">
             <div class="detail-header">
-                <button id="btn-back-from-detail" class="btn-icon">← Back</button>
+                <button id="btn-back-from-detail" class="btn-icon">← Tilbake</button>
                 <div class="detail-actions">
-                    <button id="btn-edit-recipe" class="btn-outline">Edit</button>
-                    <button id="btn-delete-recipe" class="btn-danger">Delete</button>
+                    <button id="btn-edit-recipe" class="btn-outline">Rediger</button>
+                    <button id="btn-delete-recipe" class="btn-danger">Slett</button>
                 </div>
             </div>
 
             <article class="recipe-detail-card">
                 <div class="recipe-hero">
-                    <img id="detail-image" src="" alt="Recipe Cover" style="display: none;">
+                    <img id="detail-image" src="" alt="Forsidebilde for oppskrift" style="display: none;">
                     <div class="recipe-hero-content">
-                        <h1 id="detail-title">Recipe Title</h1>
-                        <p id="detail-description">Description goes here.</p>
+                        <h1 id="detail-title">Oppskriftstittel</h1>
+                        <p id="detail-description">Beskrivelse kommer her.</p>
                         <div class="recipe-meta-tags" id="detail-tags">
                             <!-- Tags injected here -->
                         </div>
@@ -181,33 +181,33 @@
 
                 <div class="recipe-meta-bar">
                     <div class="meta-item">
-                        <span class="meta-label">Prep Time</span>
+                        <span class="meta-label">Forberedelsestid</span>
                         <span class="meta-value" id="detail-prep">--</span>
                     </div>
                     <div class="meta-item">
-                        <span class="meta-label">Cook Time</span>
+                        <span class="meta-label">Tilberedningstid</span>
                         <span class="meta-value" id="detail-cook">--</span>
                     </div>
                     <div class="meta-item">
-                        <span class="meta-label">Servings</span>
+                        <span class="meta-label">Porsjoner</span>
                         <span class="meta-value" id="detail-servings">--</span>
                     </div>
                     <div class="meta-item">
-                        <span class="meta-label">Difficulty</span>
+                        <span class="meta-label">Vanskelighetsgrad</span>
                         <span class="meta-value badge" id="detail-difficulty">--</span>
                     </div>
                 </div>
 
                 <div class="recipe-content-grid">
                     <div class="ingredients-section">
-                        <h3>Ingredients</h3>
+                        <h3>Ingredienser</h3>
                         <ul id="detail-ingredients-list" class="checklist">
                             <!-- Checkbox ingredients injected here -->
                         </ul>
                     </div>
 
                     <div class="instructions-section">
-                        <h3>Instructions</h3>
+                        <h3>Fremgangsmåte</h3>
                         <ol id="detail-instructions-list" class="step-list">
                             <!-- Ordered steps injected here -->
                         </ol>

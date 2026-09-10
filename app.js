@@ -192,7 +192,7 @@ function renderRecipes(recipes) {
             ? recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')
             : '';
 
-        const imgUrl = recipe.cover_image || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%25%22%20height%3D%22180%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22180%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%2364748b%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
+        const imgUrl = recipe.cover_image || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%25%22%20height%3D%22180%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22180%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%2364748b%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EBilde%20mangler%3C%2Ftext%3E%3C%2Fsvg%3E';
 
         card.innerHTML = `
             <img src="${imgUrl}" alt="${recipe.title}" class="card-image">
@@ -241,7 +241,7 @@ function filterRecipes() {
 // Add / Edit Recipe Form
 // -----------------------------------------------------
 function openAddRecipeForm() {
-    el.formViewTitle.textContent = "Add New Recipe";
+    el.formViewTitle.textContent = "Legg til ny oppskrift";
     el.recipeForm.reset();
     el.recipeIdInput.value = '';
     el.ingredientsContainer.innerHTML = '';
@@ -256,7 +256,7 @@ function openEditRecipeForm() {
     const recipe = state.recipes.find(r => r.id === state.currentRecipeId);
     if(!recipe) return;
 
-    el.formViewTitle.textContent = "Edit Recipe";
+    el.formViewTitle.textContent = "Rediger oppskrift";
     el.recipeIdInput.value = recipe.id;
 
     // Fill basic fields
@@ -300,7 +300,7 @@ function addDynamicRow(type, val = '') {
 
     const input = document.createElement('input');
     input.type = 'text';
-    input.placeholder = type === 'ingredient' ? 'E.g., 2 cups flour' : 'E.g., Preheat oven to 350F';
+    input.placeholder = type === 'ingredient' ? 'F.eks., 2 kopper mel' : 'F.eks., Forvarm ovnen til 200°C';
     input.value = val;
     input.className = type === 'ingredient' ? 'ingredient-input' : 'instruction-input';
     input.required = true;
@@ -379,7 +379,7 @@ async function handleSaveRecipe(e) {
         switchView('view-dashboard');
 
     } catch(err) {
-        alert("Error saving recipe: " + err.message);
+        alert("Feil ved lagring av oppskrift: " + err.message);
     }
 }
 
@@ -393,7 +393,7 @@ function openRecipeDetail(id) {
     if(!recipe) return;
 
     el.dTitle.textContent = recipe.title;
-    el.dDesc.textContent = recipe.description || 'No description provided.';
+    el.dDesc.textContent = recipe.description || 'Ingen beskrivelse oppgitt.';
     el.dPrep.textContent = recipe.prep_time_minutes ? `${recipe.prep_time_minutes}m` : '--';
     el.dCook.textContent = recipe.cook_time_minutes ? `${recipe.cook_time_minutes}m` : '--';
     el.dServings.textContent = recipe.servings || '--';
@@ -435,14 +435,14 @@ function openRecipeDetail(id) {
             el.dIngredients.appendChild(li);
         });
     } else {
-         el.dIngredients.innerHTML = '<li>No ingredients listed.</li>';
+         el.dIngredients.innerHTML = '<li>Ingen ingredienser oppgitt.</li>';
     }
 
     switchView('view-recipe-detail');
 }
 
 function handleDeleteRecipe() {
-    if(!confirm("Are you sure you want to delete this recipe?")) return;
+    if(!confirm("Er du sikker på at du vil slette denne oppskriften?")) return;
 
     try {
         let recipes = getRecipesFromStorage();
@@ -451,7 +451,7 @@ function handleDeleteRecipe() {
         state.recipes = recipes;
         switchView('view-dashboard');
     } catch(err) {
-        alert("Error deleting recipe: " + err.message);
+        alert("Feil ved sletting av oppskrift: " + err.message);
     }
 }
 
