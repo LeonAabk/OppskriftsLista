@@ -7,13 +7,13 @@
     --bg-card: #ffffff;
     --text-main: #0f172a;
     --text-muted: #64748b;
-    --primary: #f97316;
-    --primary-hover: #ea580c;
+    --primary: #fbbf24;
+    --primary-hover: #f59e0b;
     --border: #e2e8f0;
     --danger: #ef4444;
     --danger-hover: #dc2626;
 
-    --font-ui: 'Inter', sans-serif;
+    --font-ui: system-ui, 'Inter', sans-serif;
     --font-heading: 'Playfair Display', serif;
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -89,7 +89,7 @@ img {
 .app-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 3rem 2rem;
 }
 
 /* Header */
@@ -151,10 +151,12 @@ img {
 .btn-primary, .nav-btn.primary {
     background-color: var(--primary);
     color: white;
+    transition: transform 0.2s, filter 0.2s, background-color 0.2s;
 }
 .btn-primary:hover, .nav-btn.primary:hover {
     background-color: var(--primary-hover);
-    transform: translateY(-1px);
+    transform: scale(1.02);
+    filter: brightness(1.1);
 }
 
 .btn-secondary {
@@ -317,15 +319,16 @@ input:focus, textarea:focus, select:focus {
     overflow: hidden;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border);
-    transition: var(--transition);
+    transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
     cursor: pointer;
     display: flex;
     flex-direction: column;
 }
 
 .recipe-card:hover {
-    transform: translateY(-4px);
+    transform: scale(1.02);
     box-shadow: var(--shadow-md);
+    filter: brightness(1.1);
 }
 
 .card-image {
@@ -375,6 +378,17 @@ input:focus, textarea:focus, select:focus {
     text-align: center;
     padding: 3rem;
     color: var(--text-muted);
+}
+
+.empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem auto;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 4rem 2rem;
+    max-width: 600px;
 }
 
 /* -----------------------------
