@@ -1,22 +1,9 @@
 // -----------------------------------------------------
 // App Initialization & State
 // -----------------------------------------------------
-const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'; // Requires user replacement for prod
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'; // Requires user replacement for prod
-
-// Initialize Supabase (Checking if library loaded)
-let supabase;
-if (window.supabase) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} else {
-    console.error("Supabase JS not loaded.");
-}
-
-
 const state = {
-    user: null,
     recipes: [],
-    currentView: 'view-auth', // views: view-auth, view-dashboard, view-recipe-form, view-recipe-detail
+    currentView: 'view-dashboard', // views: view-dashboard, view-recipe-form, view-recipe-detail
     currentRecipeId: null
 };
 
@@ -25,27 +12,14 @@ const state = {
 // -----------------------------------------------------
 const el = {
     // Views
-    viewAuth: document.getElementById('view-auth'),
     viewDashboard: document.getElementById('view-dashboard'),
     viewRecipeForm: document.getElementById('view-recipe-form'),
     viewRecipeDetail: document.getElementById('view-recipe-detail'),
-
-    // Auth
-    authForm: document.getElementById('auth-form'),
-    authEmail: document.getElementById('auth-email'),
-    authPassword: document.getElementById('auth-password'),
-    authSubmit: document.getElementById('auth-submit'),
-    authSwitchBtn: document.getElementById('auth-switch-btn'),
-    authSwitchText: document.getElementById('auth-switch-text'),
-    authTitle: document.getElementById('auth-title'),
-    authError: document.getElementById('auth-error'),
-    authNavItems: document.getElementById('auth-nav-items'),
 
     // Navigation
     themeToggle: document.getElementById('theme-toggle'),
     navDashboard: document.getElementById('nav-dashboard'),
     navAddRecipe: document.getElementById('nav-add-recipe'),
-    btnLogout: document.getElementById('btn-logout'),
     btnBackFromForm: document.getElementById('btn-back-from-form'),
     btnBackFromDetail: document.getElementById('btn-back-from-detail'),
 
@@ -98,11 +72,6 @@ const el = {
 // Event Listeners Initialization
 // -----------------------------------------------------
 function initEvents() {
-    // Auth
-    el.authForm.addEventListener('submit', handleAuthSubmit);
-    el.authSwitchBtn.addEventListener('click', toggleAuthMode);
-    el.btnLogout.addEventListener('click', handleLogout);
-
     // Navigation
     el.navDashboard.addEventListener('click', () => switchView('view-dashboard'));
     el.navAddRecipe.addEventListener('click', openAddRecipeForm);
@@ -161,84 +130,33 @@ function switchView(viewId) {
     }
 }
 
+
 // -----------------------------------------------------
-// Authentication
+// Local Storage Layer
 // -----------------------------------------------------
-let isLoginMode = true;
+const STORAGE_KEY = 'recipebox_recipes';
 
-function toggleAuthMode() {
-    isLoginMode = !isLoginMode;
-    el.authTitle.textContent = isLoginMode ? 'Welcome Back' : 'Create Account';
-    el.authSubmit.textContent = isLoginMode ? 'Login' : 'Sign Up';
-    el.authSwitchText.textContent = isLoginMode ? "Don't have an account?" : "Already have an account?";
-    el.authSwitchBtn.textContent = isLoginMode ? "Sign Up" : "Login";
-    el.authError.textContent = '';
+function getRecipesFromStorage() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
 }
 
-async function handleAuthSubmit(e) {
-    e.preventDefault();
-    const email = el.authEmail.value;
-    const password = el.authPassword.value;
-    el.authError.textContent = 'Loading...';
-
-    try {
-        let error;
-        if (isLoginMode) {
-            const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-            error = signInError;
-        } else {
-            const { error: signUpError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: { data: { username: email.split('@')[0] } }
-            });
-            error = signUpError;
-            if(!error) el.authError.textContent = 'Check your email to confirm your account (if email confirmation is enabled), otherwise you can login.';
-        }
-
-        if (error) throw error;
-
-    } catch (err) {
-        el.authError.textContent = err.message;
-    }
-}
-
-async function handleLogout() {
-    await supabase.auth.signOut();
-}
-
-function checkAuthStatus() {
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            state.user = session.user;
-            el.authNavItems.style.display = 'flex';
-            if(state.currentView === 'view-auth') switchView('view-dashboard');
-        } else {
-            state.user = null;
-            el.authNavItems.style.display = 'none';
-            switchView('view-auth');
-        }
-    });
+function saveRecipesToStorage(recipes) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
 }
 
 // -----------------------------------------------------
 // Dashboard & Recipes
 // -----------------------------------------------------
-async function fetchRecipes() {
-    if(!state.user) return;
-
+function fetchRecipes() {
     el.dashboardLoading.style.display = 'block';
     el.recipeGrid.innerHTML = '';
     el.dashboardEmpty.style.display = 'none';
 
     try {
-        // Fetch recipes along with their ingredients to allow searching by ingredients
-        const { data, error } = await supabase
-            .from('recipes')
-            .select('*, ingredients(name)')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
+        const data = getRecipesFromStorage();
+        // Sort by created_at descending
+        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         state.recipes = data;
         renderRecipes(data);
@@ -348,10 +266,10 @@ function openEditRecipeForm() {
     el.ingredientsContainer.innerHTML = '';
     el.instructionsContainer.innerHTML = '';
 
-    // We will fetch actual ingredients from the ingredients table below
-    loadIngredientsForEdit(recipe.id);
+    // Load Ingredients locally from recipe object
+    loadIngredientsForEditLocal(recipe);
 
-    // Load Instructions (JSONB)
+    // Load Instructions
     if(recipe.instructions && recipe.instructions.length > 0) {
         recipe.instructions.forEach(inst => addDynamicRow('instruction', inst));
     } else {
@@ -361,23 +279,11 @@ function openEditRecipeForm() {
     switchView('view-recipe-form');
 }
 
-async function loadIngredientsForEdit(recipeId) {
-    try {
-        const { data, error } = await supabase
-            .from('ingredients')
-            .select('*')
-            .eq('recipe_id', recipeId)
-            .order('sort_order', { ascending: true });
-
-        if(error) throw error;
-
-        if(data && data.length > 0) {
-            data.forEach(ing => addDynamicRow('ingredient', ing.name));
-        } else {
-            addDynamicRow('ingredient');
-        }
-    } catch(err) {
-        console.error("Error loading ingredients", err);
+function loadIngredientsForEditLocal(recipe) {
+    if(recipe.ingredients && recipe.ingredients.length > 0) {
+        recipe.ingredients.forEach(ing => addDynamicRow('ingredient', ing.name));
+    } else {
+        addDynamicRow('ingredient');
     }
 }
 
@@ -425,9 +331,9 @@ async function handleSaveRecipe(e) {
     const instructionInputs = document.querySelectorAll('.instruction-input');
     const instructions = Array.from(instructionInputs).map(inp => inp.value).filter(val => val.trim() !== '');
 
-    // Gather Ingredients (To be inserted in separate table)
+    // Gather Ingredients (Saved directly in the recipe object)
     const ingredientInputs = document.querySelectorAll('.ingredient-input');
-    const ingredients = Array.from(ingredientInputs).map(inp => inp.value).filter(val => val.trim() !== '');
+    const ingredients = Array.from(ingredientInputs).map(inp => ({name: inp.value})).filter(val => val.name.trim() !== '');
 
     const recipeData = {
         title: el.fTitle.value,
@@ -439,39 +345,30 @@ async function handleSaveRecipe(e) {
         cover_image: el.fImage.value,
         tags: el.fTags.value.split(',').map(t => t.trim()).filter(t => t),
         instructions: instructions,
-        user_id: state.user.id
+        ingredients: ingredients
     };
 
     try {
-        let savedRecipeId;
+        let recipes = getRecipesFromStorage();
 
         if (id) {
             // Update
-            const { data, error } = await supabase.from('recipes').update(recipeData).eq('id', id).select().single();
-            if(error) throw error;
-            savedRecipeId = data.id;
-
-            // Delete old ingredients
-            await supabase.from('ingredients').delete().eq('recipe_id', savedRecipeId);
-
+            recipeData.id = id;
+            const index = recipes.findIndex(r => r.id === id);
+            if (index !== -1) {
+                // Preserve original creation date
+                recipeData.created_at = recipes[index].created_at;
+                recipes[index] = { ...recipes[index], ...recipeData };
+            }
         } else {
             // Insert
-            const { data, error } = await supabase.from('recipes').insert([recipeData]).select().single();
-            if(error) throw error;
-            savedRecipeId = data.id;
+            recipeData.id = Date.now().toString();
+            recipeData.created_at = new Date().toISOString();
+            recipes.push(recipeData);
         }
 
-        // Insert ingredients
-        if(ingredients.length > 0) {
-            const ingData = ingredients.map((name, idx) => ({
-                recipe_id: savedRecipeId,
-                name: name,
-                sort_order: idx
-            }));
-            const { error: ingError } = await supabase.from('ingredients').insert(ingData);
-            if(ingError) throw ingError;
-        }
-
+        saveRecipesToStorage(recipes);
+        state.recipes = recipes;
         switchView('view-dashboard');
 
     } catch(err) {
@@ -483,7 +380,7 @@ async function handleSaveRecipe(e) {
 // -----------------------------------------------------
 // Detail View
 // -----------------------------------------------------
-async function openRecipeDetail(id) {
+function openRecipeDetail(id) {
     state.currentRecipeId = id;
     const recipe = state.recipes.find(r => r.id === id);
     if(!recipe) return;
@@ -514,19 +411,10 @@ async function openRecipeDetail(id) {
         });
     }
 
-    // Fetch Ingredients
-    el.dIngredients.innerHTML = '<li>Loading ingredients...</li>';
-    try {
-        const { data, error } = await supabase
-            .from('ingredients')
-            .select('*')
-            .eq('recipe_id', id)
-            .order('sort_order', { ascending: true });
-
-        if(error) throw error;
-
-        el.dIngredients.innerHTML = '';
-        data.forEach(ing => {
+    // Load Ingredients locally
+    el.dIngredients.innerHTML = '';
+    if (recipe.ingredients && recipe.ingredients.length > 0) {
+        recipe.ingredients.forEach(ing => {
             const li = document.createElement('li');
             const label = document.createElement('label');
             const chk = document.createElement('input');
@@ -539,19 +427,21 @@ async function openRecipeDetail(id) {
             li.appendChild(label);
             el.dIngredients.appendChild(li);
         });
-    } catch(err) {
-        el.dIngredients.innerHTML = '<li>Error loading ingredients</li>';
+    } else {
+         el.dIngredients.innerHTML = '<li>No ingredients listed.</li>';
     }
 
     switchView('view-recipe-detail');
 }
 
-async function handleDeleteRecipe() {
+function handleDeleteRecipe() {
     if(!confirm("Are you sure you want to delete this recipe?")) return;
 
     try {
-        const { error } = await supabase.from('recipes').delete().eq('id', state.currentRecipeId);
-        if(error) throw error;
+        let recipes = getRecipesFromStorage();
+        recipes = recipes.filter(r => r.id !== state.currentRecipeId);
+        saveRecipesToStorage(recipes);
+        state.recipes = recipes;
         switchView('view-dashboard');
     } catch(err) {
         alert("Error deleting recipe: " + err.message);
@@ -565,5 +455,5 @@ async function handleDeleteRecipe() {
 document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
     initEvents();
-    if(window.supabase) checkAuthStatus();
+    switchView('view-dashboard');
 });window.renderRecipes = renderRecipes;

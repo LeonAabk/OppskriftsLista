@@ -14,9 +14,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -29,42 +26,17 @@
         </div>
         <nav class="nav-links">
             <button id="theme-toggle" class="btn-icon" aria-label="Toggle Dark Mode">🌙</button>
-            <div id="auth-nav-items" style="display: none;">
+            <div id="auth-nav-items">
                 <button id="nav-dashboard" class="nav-btn">Dashboard</button>
                 <button id="nav-add-recipe" class="nav-btn primary">Add Recipe</button>
-                <button id="btn-logout" class="nav-btn outline">Logout</button>
             </div>
         </nav>
     </header>
 
     <main class="app-container">
 
-        <!-- 1. Authentication View -->
-        <section id="view-auth" class="view-section active">
-            <div class="auth-card">
-                <h2 id="auth-title">Welcome Back</h2>
-                <form id="auth-form">
-                    <div class="form-group">
-                        <label for="auth-email">Email</label>
-                        <input type="email" id="auth-email" required placeholder="your@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="auth-password">Password</label>
-                        <input type="password" id="auth-password" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" id="auth-submit" class="btn-primary full-width">Login</button>
-                </form>
-                <p class="auth-switch">
-                    <span id="auth-switch-text">Don't have an account?</span>
-                    <button id="auth-switch-btn" class="btn-link">Sign Up</button>
-                </p>
-                <div id="auth-error" class="error-msg"></div>
-            </div>
-        </section>
-
-
         <!-- 2. Dashboard / Recipe Grid View -->
-        <section id="view-dashboard" class="view-section" style="display: none;">
+        <section id="view-dashboard" class="view-section active">
             <div class="dashboard-header">
                 <h2>My Recipes</h2>
                 <div class="search-filter-bar">
