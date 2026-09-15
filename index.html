@@ -28,6 +28,8 @@
             <button id="theme-toggle" class="btn-icon" aria-label="Toggle Dark Mode">🌙</button>
             <div id="auth-nav-items">
                 <button id="nav-dashboard" class="nav-btn">Oversikt</button>
+                <button id="nav-import-recipe" class="nav-btn">Importer oppskrift</button>
+                <input type="file" id="import-recipe-input" accept=".json" style="display: none;">
                 <button id="nav-add-recipe" class="nav-btn primary">Legg til oppskrift</button>
             </div>
         </nav>
@@ -162,6 +164,7 @@
             <div class="detail-header">
                 <button id="btn-back-from-detail" class="btn-icon">← Tilbake</button>
                 <div class="detail-actions">
+                    <button id="btn-export-recipe" class="btn-outline">Eksporter</button>
                     <button id="btn-edit-recipe" class="btn-outline">Rediger</button>
                     <button id="btn-delete-recipe" class="btn-danger">Slett</button>
                 </div>

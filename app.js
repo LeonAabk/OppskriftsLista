@@ -19,6 +19,8 @@ const el = {
     // Navigation
     themeToggle: document.getElementById('theme-toggle'),
     navDashboard: document.getElementById('nav-dashboard'),
+    navImportRecipe: document.getElementById('nav-import-recipe'),
+    importRecipeInput: document.getElementById('import-recipe-input'),
     navAddRecipe: document.getElementById('nav-add-recipe'),
     btnBackFromForm: document.getElementById('btn-back-from-form'),
     btnBackFromDetail: document.getElementById('btn-back-from-detail'),
@@ -63,6 +65,7 @@ const el = {
     dDiff: document.getElementById('detail-difficulty'),
     dIngredients: document.getElementById('detail-ingredients-list'),
     dInstructions: document.getElementById('detail-instructions-list'),
+    btnExportRecipe: document.getElementById('btn-export-recipe'),
     btnEditRecipe: document.getElementById('btn-edit-recipe'),
     btnDeleteRecipe: document.getElementById('btn-delete-recipe'),
 };
@@ -75,6 +78,8 @@ function initEvents() {
     // Navigation
     el.navDashboard.addEventListener('click', () => switchView('view-dashboard'));
     el.navAddRecipe.addEventListener('click', openAddRecipeForm);
+    el.navImportRecipe.addEventListener('click', () => el.importRecipeInput.click());
+    el.importRecipeInput.addEventListener('change', handleImportRecipe);
     el.btnBackFromForm.addEventListener('click', () => switchView('view-dashboard'));
     el.btnCancelForm.addEventListener('click', () => switchView('view-dashboard'));
     el.btnBackFromDetail.addEventListener('click', () => switchView('view-dashboard'));
@@ -96,6 +101,7 @@ function initEvents() {
     el.fImageUpload.addEventListener('change', handleImageUpload);
 
     // Detail Actions
+    el.btnExportRecipe.addEventListener('click', handleExportRecipe);
     el.btnEditRecipe.addEventListener('click', openEditRecipeForm);
     el.btnDeleteRecipe.addEventListener('click', handleDeleteRecipe);
 }
@@ -455,6 +461,73 @@ function handleDeleteRecipe() {
     }
 }
 
+function handleExportRecipe() {
+    const recipe = state.recipes.find(r => r.id === state.currentRecipeId);
+    if (!recipe) return;
+
+    try {
+        const recipeJson = JSON.stringify(recipe, null, 2);
+        const blob = new Blob([recipeJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+
+        // Create filename from title
+        const filename = recipe.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+
+        a.download = `${filename || 'oppskrift'}.json`;
+        document.body.appendChild(a);
+        a.click();
+
+        // Cleanup
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+    } catch (err) {
+        console.error("Error exporting recipe:", err);
+        alert("Feil ved eksport av oppskrift: " + err.message);
+    }
+}
+
+function handleImportRecipe(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const importedRecipe = JSON.parse(event.target.result);
+
+            // Generate a new unique ID
+            importedRecipe.id = Date.now().toString();
+            // Optionally update created_at to now, or keep original. We'll update to now.
+            importedRecipe.created_at = new Date().toISOString();
+
+            let recipes = getRecipesFromStorage();
+            recipes.push(importedRecipe);
+
+            saveRecipesToStorage(recipes);
+            state.recipes = recipes;
+
+            // Reset input so the same file can be uploaded again
+            el.importRecipeInput.value = '';
+
+            switchView('view-dashboard');
+            alert(`Oppskrift "${importedRecipe.title || 'Uten tittel'}" importert!`);
+        } catch (err) {
+            console.error("Error importing recipe:", err);
+            alert("Kunne ikke importere oppskriften. Er du sikker på at filen er gyldig?");
+            el.importRecipeInput.value = ''; // Reset on error too
+        }
+    };
+
+    reader.readAsText(file);
+}
 
 // -----------------------------------------------------
 // Run Initialization
