@@ -581,6 +581,48 @@ input:focus, textarea:focus, select:focus {
    Responsive Design (Mobile First adjustments)
 ------------------------------ */
 @media (max-width: 768px) {
+    .app-container {
+        padding: 1rem;
+    }
+
+    .recipe-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .app-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    #auth-nav-items {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    input, textarea, select {
+        font-size: 16px;
+    }
+
+    .nav-btn, .btn-icon, .btn-primary, .btn-secondary, .btn-outline, .btn-danger, .dynamic-row .btn-remove {
+        padding: 12px;
+        min-height: 44px;
+    }
+
+    .recipe-form-card {
+        width: 100%;
+        padding: 1rem;
+        overflow-y: auto;
+        max-height: 85vh;
+    }
+
     .dashboard-header {
         flex-direction: column;
         align-items: stretch;
