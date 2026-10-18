@@ -1,0 +1,6 @@
+{
+  "name": "Oppskriftslista",
+  "description": "En moderne og oversiktlig oppskriftsbok for å administrere, organisere og utforske personlige oppskrifter.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
