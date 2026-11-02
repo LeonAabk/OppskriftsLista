@@ -1,7 +1,7 @@
 import { Recipe, RecipeDifficulty } from '../types';
 
 /**
- * Converts ISO 8601 duration strings (e.g., "PT30M", "PT1H15M", "PT45S") to total minutes.
+ * Converts ISO 8601 duration strings (e.g., "PT30M", "PT1H15M", "PT40M", "P0DT0H20M0S") to total minutes.
  */
 export function parseIsoDuration(durationStr?: string): number {
   if (!durationStr || typeof durationStr !== 'string') return 0;
@@ -47,7 +47,7 @@ function findRecipeInJsonLd(node: any): any | null {
   }
 
   if (typeof node === 'object') {
-    const type = node['@type'];
+    const type = node['@type'] || node.type;
     const isRecipe =
       type === 'Recipe' ||
       (Array.isArray(type) && type.includes('Recipe')) ||
@@ -74,28 +74,55 @@ function findRecipeInJsonLd(node: any): any | null {
 }
 
 /**
- * Extracts and normalizes Recipe data from a JSON-LD object.
+ * Extracts cover image from JSON-LD or falls back to HTML open-graph tags.
  */
-function parseRecipeJsonLd(recipeNode: any, sourceUrl: string): Partial<Recipe> {
-  const title = decodeHtmlEntities(recipeNode.name || recipeNode.headline || 'Uten navn');
-  const description = decodeHtmlEntities(recipeNode.description || '');
-
-  // Extract cover image
-  let cover_image = '';
-  if (typeof recipeNode.image === 'string') {
-    cover_image = recipeNode.image;
-  } else if (Array.isArray(recipeNode.image) && recipeNode.image.length > 0) {
+function extractCoverImage(recipeNode: any, html?: string): string {
+  if (typeof recipeNode.image === 'string' && recipeNode.image.trim()) {
+    return recipeNode.image.trim();
+  }
+  if (Array.isArray(recipeNode.image) && recipeNode.image.length > 0) {
     const firstImg = recipeNode.image[0];
-    cover_image = typeof firstImg === 'string' ? firstImg : firstImg.url || '';
-  } else if (recipeNode.image && typeof recipeNode.image === 'object') {
-    cover_image = recipeNode.image.url || recipeNode.image.contentUrl || '';
+    const url = typeof firstImg === 'string' ? firstImg : firstImg?.url || firstImg?.contentUrl || '';
+    if (url.trim()) return url.trim();
+  }
+  if (recipeNode.image && typeof recipeNode.image === 'object') {
+    const url = recipeNode.image.url || recipeNode.image.contentUrl || '';
+    if (url.trim()) return url.trim();
   }
 
+  // Fallback to og:image or twitter:image in the raw HTML
+  if (html) {
+    const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']*)["']/i);
+    if (ogMatch && ogMatch[1].trim()) return ogMatch[1].trim();
+
+    const twitterMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']*)["']/i);
+    if (twitterMatch && twitterMatch[1].trim()) return twitterMatch[1].trim();
+  }
+
+  return '';
+}
+
+/**
+ * Extracts and normalizes Recipe data from a JSON-LD object.
+ */
+function parseRecipeJsonLd(recipeNode: any, sourceUrl: string, html?: string): Partial<Recipe> {
+  const title = decodeHtmlEntities(recipeNode.name || recipeNode.headline || 'Uten navn');
+  const description = decodeHtmlEntities(recipeNode.description || '');
+  const cover_image = extractCoverImage(recipeNode, html);
+
   // Prep time & cook time
-  const prep_time_minutes = parseIsoDuration(recipeNode.prepTime);
-  const cook_time_minutes =
-    parseIsoDuration(recipeNode.cookTime) ||
-    parseIsoDuration(recipeNode.totalTime) - prep_time_minutes;
+  let prep_time_minutes = parseIsoDuration(recipeNode.prepTime);
+  let cook_time_minutes = parseIsoDuration(recipeNode.cookTime);
+  const total_time_minutes = parseIsoDuration(recipeNode.totalTime);
+
+  if (total_time_minutes > 0) {
+    if (prep_time_minutes === 0 && cook_time_minutes === 0) {
+      prep_time_minutes = Math.round(total_time_minutes * 0.3);
+      cook_time_minutes = total_time_minutes - prep_time_minutes;
+    } else if (cook_time_minutes === 0 && prep_time_minutes > 0) {
+      cook_time_minutes = Math.max(0, total_time_minutes - prep_time_minutes);
+    }
+  }
 
   // Servings / yield
   let servings = 4;
@@ -128,7 +155,7 @@ function parseRecipeJsonLd(recipeNode: any, sourceUrl: string): Partial<Recipe> 
   if (typeof rawInstructions === 'string') {
     const split = rawInstructions
       .split(/\r?\n+/)
-      .map((s) => decodeHtmlEntities(s).trim())
+      .map((s: string) => decodeHtmlEntities(s).trim())
       .filter(Boolean);
     instructions.push(...split);
   } else if (Array.isArray(rawInstructions)) {
@@ -178,7 +205,12 @@ function parseRecipeJsonLd(recipeNode: any, sourceUrl: string): Partial<Recipe> 
     }
   }
 
-  // Difficulty deduction based on time / steps
+  if (recipeNode.recipeCuisine) {
+    const cuisine = String(recipeNode.recipeCuisine);
+    tags.push(...cuisine.split(' ').filter(Boolean));
+  }
+
+  // Difficulty deduction
   let difficulty: RecipeDifficulty = 'Medium';
   const totalMins = Math.max(0, prep_time_minutes) + Math.max(0, cook_time_minutes);
   if (totalMins > 0 && totalMins <= 25 && instructions.length <= 6) {
@@ -197,112 +229,156 @@ function parseRecipeJsonLd(recipeNode: any, sourceUrl: string): Partial<Recipe> 
     difficulty,
     category,
     tags: tags.slice(0, 8),
-    ingredients: ingredients.length > 0 ? ingredients : [{ name: 'Se oppskrift' }],
+    ingredients: ingredients.length > 0 ? ingredients : [{ name: 'Ingredienser (se originaloppskrift)' }],
     instructions: instructions.length > 0 ? instructions : ['Følg trinnene fra kilden.'],
     source_url: sourceUrl
   };
 }
 
 /**
- * Scrapes a recipe from any web URL that provides Schema.org Recipe JSON-LD.
- * Uses public CORS proxies to bypass browser CORS limitations on GitHub Pages.
+ * Fetches HTML using multiple reliable proxies in order of speed and stability.
+ */
+async function fetchPageWithFallbacks(url: string): Promise<string> {
+  // Strategy 1: Jina AI Reader with HTML return format (fast, CORS-enabled, handles modern SPAs)
+  try {
+    const jinaUrl = `https://r.jina.ai/${url}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(jinaUrl, {
+      signal: controller.signal,
+      headers: {
+        'x-return-format': 'html'
+      }
+    });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 100) {
+        return text;
+      }
+    }
+  } catch (e) {
+    // Continue to next strategy
+  }
+
+  // Strategy 2: AllOrigins JSON API
+  try {
+    const aoUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(aoUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.contents === 'string' && data.contents.length > 100) {
+        return data.contents;
+      }
+    }
+  } catch (e) {
+    // Continue to next strategy
+  }
+
+  // Strategy 3: CodeTabs CORS Proxy
+  try {
+    const ctUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(ctUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 100) {
+        return text;
+      }
+    }
+  } catch (e) {
+    // Continue to next strategy
+  }
+
+  // Strategy 4: Direct fetch (for CORS-enabled sites)
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 100) {
+        return text;
+      }
+    }
+  } catch (e) {
+    // Continue
+  }
+
+  return '';
+}
+
+/**
+ * Scrapes a recipe from any web URL.
+ * Automatically tries JSON-LD schema first; falls back to Jina markdown parsing if needed.
  */
 export async function scrapeRecipeFromUrl(rawUrl: string): Promise<Partial<Recipe>> {
   const url = rawUrl.trim();
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    throw new Error('Ugyldig URL. Husk å inkludere https://');
+    throw new Error('Ugyldig URL. Husk å inkludere https:// (f.eks. https://www.matprat.no/oppskrifter/...)');
   }
 
-  let html = '';
-  let lastError: Error | null = null;
+  // 1. Fetch HTML using multi-tier proxy
+  const html = await fetchPageWithFallbacks(url);
 
-  // 1. Try AllOrigins proxy
+  if (html) {
+    // Look for JSON-LD schema
+    const jsonLdRegex = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+    let match: RegExpExecArray | null;
+    let recipeData: any = null;
+
+    while ((match = jsonLdRegex.exec(html)) !== null) {
+      const scriptContent = match[1].trim();
+      if (!scriptContent) continue;
+      try {
+        const parsed = JSON.parse(scriptContent);
+        const found = findRecipeInJsonLd(parsed);
+        if (found) {
+          recipeData = found;
+          break;
+        }
+      } catch {
+        // Skip malformed script tags
+      }
+    }
+
+    if (recipeData) {
+      return parseRecipeJsonLd(recipeData, url, html);
+    }
+  }
+
+  // 2. Fallback: Fetch plain markdown via Jina AI reader and use smart text parser
   try {
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    const jinaMarkdownUrl = `https://r.jina.ai/${url}`;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 12000);
-    const res = await fetch(proxyUrl, { signal: controller.signal });
-    clearTimeout(timer);
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(jinaMarkdownUrl, { signal: controller.signal });
+    clearTimeout(timeout);
     if (res.ok) {
-      html = await res.text();
-    }
-  } catch (err: any) {
-    lastError = err;
-  }
-
-  // 2. Fallback to corsproxy.io
-  if (!html) {
-    try {
-      const fallbackUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 12000);
-      const res = await fetch(fallbackUrl, { signal: controller.signal });
-      clearTimeout(timer);
-      if (res.ok) {
-        html = await res.text();
+      const markdown = await res.text();
+      if (markdown && markdown.length > 100) {
+        const parsed = parseRecipeFromRawText(markdown);
+        parsed.source_url = url;
+        return parsed;
       }
-    } catch (err: any) {
-      lastError = err;
     }
+  } catch (e) {
+    // Fallback failed
   }
 
-  if (!html) {
-    throw new Error(
-      'Kunne ikke hente siden via web-proxy. Sjekk at nettsiden er offentlig tilgjengelig, eller lim inn teksten direkte i tekst-fanen.'
-    );
-  }
-
-  // Extract JSON-LD scripts
-  const jsonLdRegex = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-  let match: RegExpExecArray | null;
-  let recipeData: any = null;
-
-  while ((match = jsonLdRegex.exec(html)) !== null) {
-    const scriptContent = match[1].trim();
-    if (!scriptContent) continue;
-    try {
-      const parsed = JSON.parse(scriptContent);
-      const found = findRecipeInJsonLd(parsed);
-      if (found) {
-        recipeData = found;
-        break;
-      }
-    } catch {
-      // Continue to next script tag if JSON parse fails
-    }
-  }
-
-  if (recipeData) {
-    return parseRecipeJsonLd(recipeData, url);
-  }
-
-  // Fallback: extract title and meta description if no structured JSON-LD was found
-  const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  const metaDescMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i);
-  const ogImgMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']*)["']/i);
-
-  const title = titleMatch ? decodeHtmlEntities(titleMatch[1]).split(/[-|–]/)[0].trim() : 'Importert oppskrift';
-  const description = metaDescMatch ? decodeHtmlEntities(metaDescMatch[1]).trim() : '';
-  const cover_image = ogImgMatch ? ogImgMatch[1].trim() : '';
-
-  return {
-    title,
-    description,
-    cover_image: cover_image || undefined,
-    prep_time_minutes: 15,
-    cook_time_minutes: 25,
-    servings: 4,
-    difficulty: 'Medium',
-    category: 'Dinner',
-    tags: ['Importert'],
-    ingredients: [{ name: 'Ingredienser (se originaloppskrift)' }],
-    instructions: ['Fremgangsmåte (se originaloppskrift)'],
-    source_url: url
-  };
+  throw new Error(
+    'Kunne ikke hente oppskriften automatisk fra denne nettsiden. Prøv å åpne oppskriften på siden, kopiere teksten, og lime den inn i «Lim inn tekst»-fanen!'
+  );
 }
 
 /**
- * Smart plain-text parser: detects ingredients vs instructions from freeform text.
+ * Smart plain-text parser: detects ingredients vs instructions from freeform text or markdown.
  */
 export function parseRecipeFromRawText(rawText: string): Partial<Recipe> {
   const lines = rawText
@@ -314,7 +390,23 @@ export function parseRecipeFromRawText(rawText: string): Partial<Recipe> {
     throw new Error('Tekstfeltet er tomt.');
   }
 
-  let title = lines[0];
+  let title = '';
+  // Check for Title: in Jina markdown or first header line
+  for (const line of lines.slice(0, 10)) {
+    if (line.toLowerCase().startsWith('title:')) {
+      title = line.replace(/^title:\s*/i, '').trim();
+      break;
+    }
+    if (line.startsWith('# ') || line.startsWith('## ')) {
+      title = line.replace(/^#+\s*/, '').trim();
+      break;
+    }
+  }
+
+  if (!title) {
+    title = lines[0];
+  }
+
   if (title.length > 80) {
     title = title.substring(0, 80) + '...';
   }
@@ -324,12 +416,18 @@ export function parseRecipeFromRawText(rawText: string): Partial<Recipe> {
 
   let currentSection: 'unknown' | 'ingredients' | 'instructions' = 'unknown';
 
-  const ingredientKeywords = /^(ingrediens|ingredienser|du trenger|dette trenger du):?$/i;
-  const instructionKeywords = /^(fremgangsmåte|slik gjør du|instruksjoner|tilberedning|metode):?$/i;
-  const ingredientMeasurementRegex = /\b(\d+([\.,]\d+)?|\d+\/\d+)\s*(g|kg|dl|cl|ml|l|ss|ts|knivsodd|klype|stk|boks|pk|pakke|fedd|neve)\b/i;
+  const ingredientKeywords = /^(ingrediens|ingredienser|du trenger|dette trenger du|ingredients):?$/i;
+  const instructionKeywords = /^(fremgangsmåte|slik gjør du|instruksjoner|tilberedning|metode|instructions|directions):?$/i;
+  const ingredientMeasurementRegex = /\b(\d+([\.,]\d+)?|\d+\/\d+)\s*(g|kg|dl|cl|ml|l|ss|ts|båter|fedd|knivsodd|klype|stk|boks|pk|pakke|neve|skiver)\b/i;
 
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
+  for (let i = 0; i < lines.length; i++) {
+    const rawLine = lines[i];
+    // Strip markdown formatting like ###, **, [ ]
+    const line = rawLine
+      .replace(/^#+\s*/, '')
+      .replace(/^\*\*(.*?)\*\*$/, '$1')
+      .replace(/^-\s*\[[ x]\]\s*/i, '')
+      .trim();
 
     if (ingredientKeywords.test(line)) {
       currentSection = 'ingredients';
@@ -341,28 +439,34 @@ export function parseRecipeFromRawText(rawText: string): Partial<Recipe> {
       continue;
     }
 
+    // Stop ingredients if we encounter a new header or comments
+    if (currentSection === 'ingredients' && (line.startsWith('##') || /^(kommentarer|vurdering|næring|tips)/i.test(line))) {
+      currentSection = 'unknown';
+      continue;
+    }
+
     // Heuristics for lines
     const isNumbered = /^\d+[\.\)]\s+/.test(line);
     const hasMeasurement = ingredientMeasurementRegex.test(line);
 
     if (currentSection === 'ingredients') {
       const cleaned = line.replace(/^[-•*]\s*/, '').trim();
-      if (cleaned) ingredients.push({ name: cleaned });
+      if (cleaned && cleaned.length > 1 && !cleaned.startsWith('http') && !cleaned.startsWith('![')) {
+        ingredients.push({ name: cleaned });
+      }
     } else if (currentSection === 'instructions') {
       const cleaned = line.replace(/^\d+[\.\)]\s*/, '').trim();
-      if (cleaned) instructions.push(cleaned);
+      if (cleaned && cleaned.length > 8 && !cleaned.startsWith('![')) {
+        instructions.push(cleaned);
+      }
     } else {
       // Auto-detect based on formatting
-      if (isNumbered || line.length > 80) {
+      if (isNumbered || (line.length > 70 && !line.startsWith('!['))) {
         instructions.push(line.replace(/^\d+[\.\)]\s*/, '').trim());
-      } else if (hasMeasurement || line.startsWith('-') || line.startsWith('•') || line.startsWith('*')) {
-        ingredients.push({ name: line.replace(/^[-•*]\s*/, '').trim() });
-      } else {
-        // Fallback to instruction if medium-long, else ingredient
-        if (line.length > 50) {
-          instructions.push(line);
-        } else {
-          ingredients.push({ name: line });
+      } else if (hasMeasurement || line.startsWith('- ') || line.startsWith('• ') || line.startsWith('* ')) {
+        const cleaned = line.replace(/^[-•*]\s*/, '').trim();
+        if (cleaned && !cleaned.startsWith('![')) {
+          ingredients.push({ name: cleaned });
         }
       }
     }
@@ -375,8 +479,8 @@ export function parseRecipeFromRawText(rawText: string): Partial<Recipe> {
     servings: 4,
     difficulty: 'Medium',
     category: 'Dinner',
-    tags: ['Egen oppskrift'],
-    ingredients: ingredients.length > 0 ? ingredients : [{ name: 'Ingredienser' }],
-    instructions: instructions.length > 0 ? instructions : ['Steg 1: Tilbered ingrediensene.']
+    tags: ['Importert'],
+    ingredients: ingredients.length > 0 ? ingredients : [{ name: 'Ingredienser (se originaloppskrift)' }],
+    instructions: instructions.length > 0 ? instructions : ['Steg 1: Tilbered ingrediensene etter oppskriften.']
   };
 }

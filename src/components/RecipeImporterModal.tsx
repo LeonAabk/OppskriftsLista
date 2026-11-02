@@ -30,18 +30,17 @@ export const RecipeImporterModal: React.FC<RecipeImporterModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleScrapeUrl = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const triggerScrapeWithUrl = async (urlToScrape: string) => {
     setErrorMsg(null);
     setParsedPreview(null);
-    if (!urlInput.trim()) {
+    if (!urlToScrape.trim()) {
       setErrorMsg('Vennligst oppgi en gyldig nettadresse (URL).');
       return;
     }
 
     setIsLoading(true);
     try {
-      const result = await scrapeRecipeFromUrl(urlInput.trim());
+      const result = await scrapeRecipeFromUrl(urlToScrape.trim());
       setParsedPreview(result);
     } catch (err: any) {
       setErrorMsg(
@@ -50,6 +49,11 @@ export const RecipeImporterModal: React.FC<RecipeImporterModalProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleScrapeUrl = (e: React.FormEvent) => {
+    e.preventDefault();
+    triggerScrapeWithUrl(urlInput);
   };
 
   const handleParseText = (e: React.FormEvent) => {
@@ -180,13 +184,44 @@ export const RecipeImporterModal: React.FC<RecipeImporterModalProps> = ({
         </div>
 
         <div className="modal-body">
-          {errorMsg && <div className="alert-banner alert-error">{errorMsg}</div>}
+          {errorMsg && (
+            <div
+              className="alert-banner alert-error"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '0.4rem',
+              }}
+            >
+              <span>{errorMsg}</span>
+              <button
+                type="button"
+                className="btn-text-link"
+                style={{
+                  fontWeight: 600,
+                  color: 'inherit',
+                  textDecoration: 'underline',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+                onClick={() => {
+                  setActiveTab('text');
+                  setErrorMsg(null);
+                }}
+              >
+                Gå til «Lim inn tekst» i stedet 📝
+              </button>
+            </div>
+          )}
 
           {/* TAB 1: URL */}
           {activeTab === 'url' && (
             <form onSubmit={handleScrapeUrl} className="importer-form">
               <p className="importer-hint">
-                Lim inn en lenke fra en oppskriftsnettside (f.eks. Matprat, Meny, NRK Mat, Trines Matblogg, BBC Good Food eller Allrecipes).
+                Lim inn en lenke fra en matside (f.eks. Matprat, Meny, NRK Mat, Trines Matblogg, BBC Good Food eller Allrecipes).
               </p>
               <div className="url-input-group">
                 <input
@@ -206,6 +241,65 @@ export const RecipeImporterModal: React.FC<RecipeImporterModalProps> = ({
                   {isLoading ? 'Henter...' : 'Hent oppskrift'}
                 </button>
               </div>
+
+              {/* Quick suggestion chips */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '0.4rem',
+                  marginTop: '0.85rem',
+                }}
+              >
+                <span className="text-muted" style={{ fontSize: '0.8rem' }}>
+                  Hurtigtest:
+                </span>
+                <button
+                  type="button"
+                  className="chip-sm"
+                  onClick={() => {
+                    const testUrl = 'https://www.matprat.no/oppskrifter/sunn/kyllingramen/';
+                    setUrlInput(testUrl);
+                    triggerScrapeWithUrl(testUrl);
+                  }}
+                  disabled={isLoading}
+                >
+                  🍜 Kyllingramen (Matprat)
+                </button>
+                <button
+                  type="button"
+                  className="chip-sm"
+                  onClick={() => {
+                    const testUrl = 'https://trinesmatblogg.no/recipe/pasta-med-laks-og-flotesaus/';
+                    setUrlInput(testUrl);
+                    triggerScrapeWithUrl(testUrl);
+                  }}
+                  disabled={isLoading}
+                >
+                  🍝 Laksepasta (Trines Matblogg)
+                </button>
+              </div>
+
+              {isLoading && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    marginTop: '1.25rem',
+                    padding: '0.85rem',
+                    background: 'var(--bg-main)',
+                    borderRadius: 'var(--radius)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <div className="loading-spinner" style={{ width: '20px', height: '20px' }}></div>
+                  <span style={{ fontSize: '0.88rem' }}>
+                    Henter og tolker oppskrift, ingredienser og steketider...
+                  </span>
+                </div>
+              )}
             </form>
           )}
 
@@ -272,7 +366,7 @@ export const RecipeImporterModal: React.FC<RecipeImporterModalProps> = ({
                       rel="noopener noreferrer"
                       className="parsed-preview-link"
                     >
-                      Kilde: {new URL(parsedPreview.source_url).hostname} ↗
+                      Kilde: {new URL(parsedPreview.source_url).hostname.replace('www.', '')} ↗
                     </a>
                   )}
                 </div>
