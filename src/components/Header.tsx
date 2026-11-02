@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { ViewMode } from '../types';
 
 interface HeaderProps {
@@ -6,7 +6,7 @@ interface HeaderProps {
   shoppingItemCount: number;
   onNavigate: (view: ViewMode) => void;
   onAddRecipe: () => void;
-  onImportRecipe: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onOpenImporterModal: () => void;
   onOpenTimer: () => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
@@ -17,20 +17,11 @@ export const Header: React.FC<HeaderProps> = ({
   shoppingItemCount,
   onNavigate,
   onAddRecipe,
-  onImportRecipe,
+  onOpenImporterModal,
   onOpenTimer,
   theme,
   onToggleTheme,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImportClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-      fileInputRef.current.click();
-    }
-  };
-
   return (
     <header className="app-header">
       <div
@@ -52,6 +43,23 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         <button
+          id="nav-explore"
+          className={`nav-btn ${currentView === 'view-explore' ? 'active-link' : ''}`}
+          onClick={() => onNavigate('view-explore')}
+        >
+          Utforsk
+        </button>
+
+        <button
+          id="nav-meal-planner"
+          className={`nav-btn ${currentView === 'view-meal-planner' ? 'active-link' : ''}`}
+          onClick={() => onNavigate('view-meal-planner')}
+        >
+          Ukemeny
+        </button>
+
+        <button
+          id="nav-shopping-list"
           className={`nav-btn ${currentView === 'view-shopping-list' ? 'active-link' : ''}`}
           onClick={() => onNavigate('view-shopping-list')}
         >
@@ -63,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           type="button"
-          className="nav-btn"
+          className="nav-btn nav-btn-timer"
           onClick={onOpenTimer}
         >
           Timer ⏱
@@ -71,19 +79,13 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           id="nav-import-recipe"
+          type="button"
           className="nav-btn"
-          onClick={handleImportClick}
+          onClick={onOpenImporterModal}
+          title="Importer fra nettside, tekst eller JSON"
         >
-          Importer
+          Importer 🌐
         </button>
-        <input
-          type="file"
-          id="import-recipe-input"
-          ref={fileInputRef}
-          accept=".json"
-          style={{ display: 'none' }}
-          onChange={onImportRecipe}
-        />
       </nav>
 
       <div className="header-actions-right">

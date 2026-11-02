@@ -74,6 +74,15 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
     window.print();
   };
 
+  let hostname = '';
+  if (recipe.source_url) {
+    try {
+      hostname = new URL(recipe.source_url).hostname.replace('www.', '');
+    } catch {
+      hostname = recipe.source_url;
+    }
+  }
+
   return (
     <section id="view-recipe-detail" className="view-section active print-container">
       {/* Top action bar */}
@@ -187,6 +196,19 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
               <p id="detail-description">{recipe.description}</p>
             )}
 
+            {recipe.source_url && (
+              <p className="recipe-source-link text-muted no-print">
+                Kilde:{' '}
+                <a
+                  href={recipe.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {hostname} ↗
+                </a>
+              </p>
+            )}
+
             {recipe.tags && recipe.tags.length > 0 && (
               <div className="recipe-meta-tags text-muted" id="detail-tags">
                 {recipe.tags.map((tag, idx) => (
@@ -225,7 +247,7 @@ export const RecipeDetailView: React.FC<RecipeDetailViewProps> = ({
           <div className="meta-item">
             <span className="meta-label">Vanskelighetsgrad</span>
             <span className="meta-value" id="detail-difficulty">
-              {recipe.difficulty}
+              {recipe.difficulty === 'Easy' ? 'Enkel' : recipe.difficulty === 'Medium' ? 'Middels' : 'Avansert'}
             </span>
           </div>
 

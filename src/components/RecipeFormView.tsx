@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Recipe, RecipeDifficulty } from '../types';
 
 interface RecipeFormViewProps {
-  recipeToEdit: Recipe | null;
+  recipeToEdit: Recipe | Partial<Recipe> | null;
   onSave: (recipeData: Omit<Recipe, 'id' | 'created_at'> & { id?: string }) => void;
   onCancel: () => void;
 }

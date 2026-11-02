@@ -8,6 +8,8 @@ interface DashboardViewProps {
   onAddRecipe: () => void;
   onToggleFavorite: (id: string, e: React.MouseEvent) => void;
   onRestoreExamples: () => void;
+  onNavigateToExplore?: () => void;
+  onOpenImporterModal?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -16,6 +18,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onAddRecipe,
   onToggleFavorite,
   onRestoreExamples,
+  onNavigateToExplore,
+  onOpenImporterModal,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -24,6 +28,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const categories = [
     { id: 'all', label: 'Alle' },
+    { id: 'quick', label: '⚡ Under 20 min' },
     { id: 'Dinner', label: 'Middag' },
     { id: 'Breakfast', label: 'Frokost' },
     { id: 'Lunch', label: 'Lunsj' },
@@ -42,8 +47,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         return false;
       }
 
+      // Quick under 20 min filter
+      if (selectedCategory === 'quick') {
+        const total = (r.prep_time_minutes || 0) + (r.cook_time_minutes || 0);
+        if (total > 20) return false;
+      }
+
       // Category filter
-      if (selectedCategory !== 'all' && selectedCategory !== 'favorites') {
+      if (selectedCategory !== 'all' && selectedCategory !== 'favorites' && selectedCategory !== 'quick') {
         const matchesCat = r.category === selectedCategory || (r.tags && r.tags.includes(selectedCategory));
         if (!matchesCat) return false;
       }
@@ -103,14 +114,37 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {favoritesCount > 0 && ` · ${favoritesCount} favoritter`}
           </p>
         </div>
+
         <div className="dashboard-top-actions">
+          {onNavigateToExplore && (
+            <button
+              type="button"
+              className="btn-secondary small"
+              onClick={onNavigateToExplore}
+              title="Finn inspirasjon og nye oppskrifter i oppskriftsbanken"
+            >
+              ✨ Utforsk oppskriftsbank
+            </button>
+          )}
+
+          {onOpenImporterModal && (
+            <button
+              type="button"
+              className="btn-secondary small"
+              onClick={onOpenImporterModal}
+              title="Lim inn URL fra Matprat, Meny eller andre nettsider"
+            >
+              🌐 Importer fra lenke
+            </button>
+          )}
+
           <button
             type="button"
             className="btn-outline small"
             onClick={onRestoreExamples}
-            title="Last inn eller gjenopprett alle 8 gode norske eksempeloppskrifter"
+            title="Last inn eller gjenopprett alle de 8 opprinnelige norske eksempeloppskriftene"
           >
-            ↺ Last inn eksempler
+            ↺ Gjenopprett eksempler
           </button>
         </div>
       </div>
@@ -163,6 +197,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             >
               <option value="">Alle tider</option>
               <option value="15">Under 15 min</option>
+              <option value="20">Under 20 min</option>
               <option value="30">Under 30 min</option>
               <option value="45">Under 45 min</option>
               <option value="60">Under 1 time</option>
@@ -194,22 +229,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="empty-icon">🍳</span>
             <h3>Ingen oppskrifter funnet</h3>
             <p>
-              Kom raskt i gang ved å opprette din egen rett, eller last inn et sett med nydelige eksempeloppskrifter!
+              Kokeboken din er tom akkurat nå. Utforsk oppskriftsbanken vår med over 25 deilige retter, importer fra nettsider, eller opprett din egen!
             </p>
             <div className="empty-state-buttons">
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={onAddRecipe}
-              >
-                + Opprett ny oppskrift
-              </button>
+              {onNavigateToExplore && (
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={onNavigateToExplore}
+                >
+                  ✨ Bla i oppskriftsbanken
+                </button>
+              )}
+              {onOpenImporterModal && (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={onOpenImporterModal}
+                >
+                  🌐 Importer fra nettside
+                </button>
+              )}
               <button
                 type="button"
                 className="btn-outline"
                 onClick={onRestoreExamples}
               >
-                ↺ Last inn eksempeloppskrifter
+                ↺ Last inn starteksempler
               </button>
             </div>
           </div>
@@ -298,11 +344,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </p>
                   )}
 
-                  {/* Clean unboxed metadata according to Zero-Pill rule */}
                   <div className="card-metadata-line text-muted">
                     <span>⏱ {totalTime} min</span>
                     <span aria-hidden="true">·</span>
-                    <span>{recipe.difficulty}</span>
+                    <span>
+                      {recipe.difficulty === 'Easy' ? 'Enkel' : recipe.difficulty === 'Medium' ? 'Middels' : 'Avansert'}
+                    </span>
                     <span aria-hidden="true">·</span>
                     <span>{recipe.servings} porsj.</span>
                   </div>

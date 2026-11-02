@@ -1,0 +1,717 @@
+import { Recipe } from '../types';
+import { INITIAL_RECIPES } from './sampleRecipes';
+
+export const CURATED_LIBRARY: Recipe[] = [
+  // --- 1. Raske hverdagsmiddager (< 20 min) ---
+  {
+    id: 'curated-1',
+    title: 'Kremet Pasta med Røkt Laks og Erter',
+    description: 'En nydelig 15-minutters hverdagsfavoritt med biter av røkelaks, søte erter, sitronzest og frisk dill i en silkemyk fløtesaus.',
+    difficulty: 'Easy',
+    category: 'Dinner',
+    prep_time_minutes: 5,
+    cook_time_minutes: 10,
+    servings: 4,
+    tags: ['Middag', 'Pasta', 'Fisk', 'Hurtig (<20 min)', 'Hverdag'],
+    cover_image: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281720?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Kok pastaen (tagliatelle eller penne) i rikelig med godt saltet vann etter anvisning på pakken.',
+      'Smelt smør i en vid panne, tilsett fløte og revet sitronskall. La det koke forsiktig opp i 2–3 minutter.',
+      'Ha i frosne erter og la dem trekke i den varme sausen i 1 minutt.',
+      'Vend inn revet parmesan til den smelter og tykner sausen.',
+      'Hell vannet av den kokte pastaen og vend den rett inn i sausen.',
+      'Trekk pannen av varmen, vend forsiktig inn biter av røkt laks og rikelig med finhakket frisk dill.',
+      'Smak til med noen dråper sitronsaft og kvernet sort pepper. Server rykende varm.'
+    ],
+    ingredients: [
+      { name: '400 g tagliatelle eller båndpasta' },
+      { name: '250 g røkt laks, i skiver/biter' },
+      { name: '3 dl kremfløte eller matfløte' },
+      { name: '150 g frosne grønne erter' },
+      { name: '1 stk sitron, finrevet skall og saft' },
+      { name: '60 g parmesan, ferskrevet' },
+      { name: '1 potte frisk dill, grovhakket' },
+      { name: '1 ss smør' },
+      { name: '0.5 ts kvernet sort pepper' }
+    ],
+    notes: 'Røkelaksen skal bare varmes lett i sausen rett før servering for å bevare den fine røyksmaken og den møre konsistensen.',
+    created_at: '2025-01-10T12:00:00Z'
+  },
+  {
+    id: 'curated-2',
+    title: 'Lynrask Biff- og Brokkoli-Wok',
+    description: 'Møre strimler av storfekjøtt med sprø brokkolibuketter i en aromatisk ingefær- og hvitløkssaus. Ferdig på et kvarter!',
+    difficulty: 'Easy',
+    category: 'Dinner',
+    prep_time_minutes: 8,
+    cook_time_minutes: 7,
+    servings: 3,
+    tags: ['Middag', 'Kjøtt', 'Asiatisk', 'Hurtig (<20 min)', 'Wok'],
+    cover_image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Skjær biffkjøttet i tynne strimler på tvers av muskelfibrene. Del brokkoli i små munnfullstore buketter.',
+      'Rør sammen soyasaus, østerssaus, brunt sukker, sesamolje, revet hvitløk og maizena i en skål.',
+      'Varm 1 ss nøytral olje i en rykende varm wok eller vid jernpanne.',
+      'Brun biffstrimlene lynraskt i 2 minutter på høy varme. Løft kjøttet over på en tallerken.',
+      'Ha litt ny olje i pannen, tilsett brokkolien og 2 ss vann. Dampstek i 3 minutter til den er knasende sprø.',
+      'Ha kjøttet tilbake i pannen, hell over sausen og la det koke opp under omrøring i 1 minutt til sausen tykner og glaserer alt.',
+      'Topp med ristede sesamfrø og server med varm jasminris eller nudler.'
+    ],
+    ingredients: [
+      { name: '400 g mørbrad eller ytrefilet av storfe' },
+      { name: '1 stk stor brokkoli' },
+      { name: '3 ss soyasaus' },
+      { name: '2 ss østerssaus' },
+      { name: '1 ss brunt sukker' },
+      { name: '1 ts sesamolje' },
+      { name: '2 fedd hvitløk, revet' },
+      { name: '1 ts fersk ingefær, revet' },
+      { name: '1 ts maizena' },
+      { name: '2 ss rapsolje til steking' },
+      { name: '1 ss sesamfrø' }
+    ],
+    notes: 'Woking krever høy varme – ikke stek for mye kjøtt om gangen så det koker i stedet for å stekes.',
+    created_at: '2025-01-11T12:00:00Z'
+  },
+  {
+    id: 'curated-3',
+    title: 'Kylling Quesadillas med Avokado og Cheddar',
+    description: 'Gyldne, sprøstekte hvetetortillas fylt med saftig krydret kylling, smeltet moden cheddar, mais og frisk koriander. Toppes med guacamole.',
+    difficulty: 'Easy',
+    category: 'Dinner',
+    prep_time_minutes: 10,
+    cook_time_minutes: 8,
+    servings: 4,
+    tags: ['Middag', 'Tex-Mex', 'Kylling', 'Hurtig (<20 min)', 'Kos'],
+    cover_image: 'https://images.unsplash.com/photo-1618040996337-56904b7850b9?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Riv eller skjær ferdigstekt kyllingfilet i tynne strimler og vend inn tacokrydder.',
+      'Legg en hvetetortilla flatt i en tørr, middels varm stekepanne.',
+      'Dryss et sjenerøst lag revet cheddar over den ene halvdelen av tortillaen.',
+      'Legg på kyllingstrimler, mais, vårløk og frisk koriander, og topp med enda litt mer ost.',
+      'Brett den andre halvdelen over og klem lett ned med en stekespade.',
+      'Stek i 2–3 minutter til undersiden er gyllenbrun og sprø, snu forsiktig og stek den andre siden til osten er helt smeltet.',
+      'Skjær i trekanter og server med salsa, lettrømme og fersk guacamole.'
+    ],
+    ingredients: [
+      { name: '4 stk store hvetetortillas' },
+      { name: '300 g grillet kylling eller kyllingfilet' },
+      { name: '200 g revet cheddar eller jarlsberg' },
+      { name: '1 boks maiskorn (ca. 150g)' },
+      { name: '2 stilker vårløk, finsnittet' },
+      { name: '1 ss tacokrydder' },
+      { name: '1 neve frisk koriander' },
+      { name: '1 stk moden avokado til servering' },
+      { name: '4 ss rømme til servering' }
+    ],
+    created_at: '2025-01-12T12:00:00Z'
+  },
+  {
+    id: 'curated-4',
+    title: 'Klassisk Shakshuka med Feta og Surdeigsbrød',
+    description: 'Pannestekte egg posjert i en rik, krydret tomatsaus med paprika, spisskummen og hvitløk, toppet med smuldret salt fetaost og persille.',
+    difficulty: 'Easy',
+    category: 'Breakfast',
+    prep_time_minutes: 8,
+    cook_time_minutes: 12,
+    servings: 2,
+    tags: ['Frokost', 'Brunch', 'Lunsj', 'Vegetar', 'Hurtig (<20 min)'],
+    cover_image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Varm olivenolje i en vid jernpanne eller kasserolle på middels varme.',
+      'Fres finhakket løk, rød paprika og hvitløk til grønnsakene er møre (ca. 4 minutter).',
+      'Tilsett spisskummen, paprikapulver, chiliflak og tomatpuré, og stek med i 1 minutt.',
+      'Hell i de hakkede tomatene, rør rundt og la sausen boble og tykne lett i 5 minutter. Smak til med salt og pepper.',
+      'Lag 4 små fordypninger i sausen med baksiden av en skje, og knekk forsiktig et egg oppi hver fordypning.',
+      'Legg på lokk, senk varmen, og la eggene posjere i 4–6 minutter til eggehviten har stivnet, men plommen fortsatt er rennende.',
+      'Dryss over smuldret fetaost, frisk bladpersille og ringle litt god olivenolje over.',
+      'Server rett fra pannen sammen med ristet surdeigsbrød til å dyppe i sausen.'
+    ],
+    ingredients: [
+      { name: '4 stk egg' },
+      { name: '1 boks hermetiske hakkede tomater (400g)' },
+      { name: '1 stk rød paprika, i strimler' },
+      { name: '1 stk gul løk, finhakket' },
+      { name: '2 fedd hvitløk, finhakket' },
+      { name: '1 ts malt spisskummen' },
+      { name: '1 ts paprikapulver' },
+      { name: '0.25 ts chiliflak' },
+      { name: '1 ss tomatpuré' },
+      { name: '2 ss god olivenolje' },
+      { name: '60 g ekte gresk fetaost' },
+      { name: '1 neve frisk bladpersille' },
+      { name: '4 skiver godt surdeigsbrød' }
+    ],
+    created_at: '2025-01-13T12:00:00Z'
+  },
+  {
+    id: 'curated-5',
+    title: 'Sprø Smash Burgers med Karamellisert Løk',
+    description: 'Knuste kjøttdeigpucker stekt på rykende jernplate for maksimal karamellisert stekeskorpe, toppet med smeltet cheddar og chipotlemajones.',
+    difficulty: 'Easy',
+    category: 'Dinner',
+    prep_time_minutes: 10,
+    cook_time_minutes: 10,
+    servings: 2,
+    tags: ['Middag', 'Kjøtt', 'Burger', 'Helgekos', 'Hurtig (<20 min)'],
+    cover_image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Del kjøttdeigen i 4 like store løse kuler (ca. 80-90g hver). Ikke pakk dem for tett.',
+      'Skjær løken i syltynne ringer.',
+      'Varm en støpejernspanne til den er rykende varm. Rist briochebrødene lett med litt smør og sett til side.',
+      'Legg kjøttkulene i den tørre, varme pannen. Legg en god neve tynnskåret løk på toppen av hver kule.',
+      'Bruk en solid stekespade (og bakepapir imellom) og press kula helt flat mot bunnen med full kraft.',
+      'Krydre raust med salt og pepper. Stek uforstyrret i 2 minutter til kantene er mørkebrune og sprø.',
+      'Skrap burgerne løs fra pannen, snu dem, og legg umiddelbart en skive cheddar på hver.',
+      'Legg to smashpatties oppå hverandre, løft over i briochebrødene smurt med burgersaus, og nyt med det samme!'
+    ],
+    ingredients: [
+      { name: '350 g kvernet storfekjøtt med god fettholdighet (ca. 14–18%)' },
+      { name: '1 stk gul løk, skåret i syltynne skiver' },
+      { name: '4 skiver modnet cheddarost' },
+      { name: '2 stk ferske brioche hamburgerbrød' },
+      { name: '3 ss god burgersaus eller chilimajones' },
+      { name: '1 ts flaksalt' },
+      { name: '1 ts grovkvernet sort pepper' },
+      { name: '4 skiver sylteagurk' }
+    ],
+    created_at: '2025-01-14T12:00:00Z'
+  },
+
+  // --- 2. Norsk tradisjonsmat og husmannskost ---
+  {
+    id: 'curated-6',
+    title: 'Mormors Fårikål med Hel Pepper',
+    description: 'Norges ubestridte nasjonalrett! Mørt lammekjøtt og hodekål lagt lagvis med hel pepper, kokt til kjøttet faller fra beinet.',
+    difficulty: 'Easy',
+    category: 'Dinner',
+    prep_time_minutes: 15,
+    cook_time_minutes: 120,
+    servings: 6,
+    tags: ['Middag', 'Norsk tradisjon', 'Lam', 'Husmannskost', 'Høst'],
+    cover_image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Del hodekålen i jevne, store båter.',
+      'Legg lammekjøtt og kålbåter lagvis i en stor kasserolle. Begynn med det feteste kjøttet med fettsiden ned.',
+      'Strø litt hvetemel, salt og hel sort pepper mellom hvert lag.',
+      'Hell på kaldt vann langs kanten så det dekker ca. en tredjedel av kjelen.',
+      'Kok forsiktig opp under lokk på middels varme. Skru deretter ned varmen så det bare syder svakt.',
+      'La fårikålen trekke under lokk i ca. 2 til 2.5 timer til lammekjøttet er silkemørt og slipper beinet.',
+      'Server rykende varm med kokte mandelpoteter og flatbrød.'
+    ],
+    ingredients: [
+      { name: '1.5 kg fårikålkjøtt av lam' },
+      { name: '1.5 kg hodekål' },
+      { name: '2 ss hvetemel (valgfritt for jevning)' },
+      { name: '2 ss hel sort pepper' },
+      { name: '2 ts salt' },
+      { name: '4 dl kaldt vann' },
+      { name: '1 kg mandelpoteter til servering' }
+    ],
+    notes: 'Fårikål smaker nesten enda bedre dagen derpå når kraften har satt seg skikkelig.',
+    created_at: '2025-01-15T12:00:00Z'
+  },
+  {
+    id: 'curated-7',
+    title: 'Kremet Fiskegrateng med Torsk og Purre',
+    description: 'Hjemmelaget tradisjonsgrateng med fersk torsk, makaroni og fløyelsmyk hvit saus, toppet med gyllent sprøtt griljermel.',
+    difficulty: 'Medium',
+    category: 'Dinner',
+    prep_time_minutes: 25,
+    cook_time_minutes: 35,
+    servings: 4,
+    tags: ['Middag', 'Fisk', 'Norsk tradisjon', 'Husmannskost', 'Form'],
+    cover_image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Forvarm stekeovnen til 200°C over- og undervarme. Smør en ildfast form.',
+      'Kok makaronien i lettsaltet vann i ca. 6 minutter (al dente) og sil av vannet.',
+      'Smelt smør i en kasserolle, rør inn hvetemel og spe gradvis med varm melk under jevn pisking til en tykk hvit saus.',
+      'Ta sausen av platen. Rør inn salt, pepper og revet muskatnøtt.',
+      'Skill eggene. Rør eggeplommene inn i den litt avkjølte sausen én etter én.',
+      'Stivpisk eggehvitene i en ren bolle.',
+      'Skjær torskefileten i munnfullstore terninger og finsnitt purren.',
+      'Vend torsk, purre og kokt makaroni inn i sausen. Vend deretter forsiktig inn de stivpiskede eggehvitene med en slikkepott for en luftig grateng.',
+      'Hell over i den smurte formen, dryss griljermel over toppen, og stek midt i ovnen i ca. 35 minutter til den har hevet seg og fått en gyllen overflate.',
+      'Server med revet råkost av gulrot og smeltet meierismør.'
+    ],
+    ingredients: [
+      { name: '500 g torskefilet uten skinn og bein' },
+      { name: '150 g makaroni' },
+      { name: '1 stk purre, vasket og finsnittet' },
+      { name: '3 ss smør' },
+      { name: '3 ss hvetemel' },
+      { name: '5 dl melk' },
+      { name: '3 stk egg, skilt i plomme og hvite' },
+      { name: '0.5 ts revet muskatnøtt' },
+      { name: '1.5 ts salt' },
+      { name: '0.5 ts hvit pepper' },
+      { name: '4 ss griljermel eller strøkavring' }
+    ],
+    created_at: '2025-01-16T12:00:00Z'
+  },
+  {
+    id: 'curated-8',
+    title: 'Tradisjonell Brun Lapskaus',
+    description: 'Mettende og hjertevarmende lapskaus med mørt storfekjøtt, poteter, gulrøtter, kålrot og purre i en fyldig kraft.',
+    difficulty: 'Easy',
+    category: 'Dinner',
+    prep_time_minutes: 20,
+    cook_time_minutes: 60,
+    servings: 4,
+    tags: ['Middag', 'Norsk tradisjon', 'Gryte', 'Kjøtt', 'Høst'],
+    cover_image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Skjær storfekjøttet i jevne terninger på ca. 2 cm.',
+      'Brun kjøttet i smør i en varm gryte i flere omganger så det får god stekeskorpe. Ta kjøttet til side.',
+      'Skrell poteter, gulrøtter, sellerirot og kålrot og kutt alt i terninger. Vask og snitt purren.',
+      'Ha kjøttet tilbake i gryta, hell over kjøttbuljong så det dekker, og kok opp. La kjøttet småkoke under lokk i 30 minutter.',
+      'Tilsett rotgrønnsakene og potetene. La alt småkoke videre i 25–30 minutter til potetene begynner å mose seg lett og tykner lapskausen naturlig.',
+      'Ha i purren de siste 5 minuttene.',
+      'Smak til med salt og rikelig med nykvernet sort pepper. Server med godt flatbrød og meierismør.'
+    ],
+    ingredients: [
+      { name: '600 g storfekjøtt (f.eks. høyrygg eller bog)' },
+      { name: '800 g kokefaste poteter, skrellet og i terninger' },
+      { name: '3 stk gulrøtter, i terninger' },
+      { name: '200 g kålrot, i terninger' },
+      { name: '100 g sellerirot, i terninger' },
+      { name: '1 stk purre, i ringer' },
+      { name: '8 dl god kjøttbuljong' },
+      { name: '2 ss meierismør til steking' },
+      { name: '1.5 ts salt' },
+      { name: '1 ts nykvernet sort pepper' }
+    ],
+    created_at: '2025-01-17T12:00:00Z'
+  },
+
+  // --- 3. Italiensk, Pasta & Pizza ---
+  {
+    id: 'curated-9',
+    title: 'Hjemmelaget Napolitansk Pizza Margherita',
+    description: 'Sprø bunn med luftige kanter, enkel saus av San Marzano-tomater, fersk fior di latte-mozzarella og frisk basilikum.',
+    difficulty: 'Medium',
+    category: 'Dinner',
+    prep_time_minutes: 25,
+    cook_time_minutes: 8,
+    servings: 2,
+    tags: ['Middag', 'Pizza', 'Italiensk', 'Vegetar', 'Helgekos'],
+    cover_image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Sett stekeovnen på maksimal temperatur (helst 250°C–300°C med pizzastål eller -stein forvarmet i minst 45 minutter).',
+      'Mos de hermetiske tomatene forsiktig for hånd sammen med en klype salt og 1 ss olivenolje.',
+      'Form pizzadeigen med hendene fra midten og ut mot kanten så du bevarer den luftige kanten (cornicione). Ikke bruk kjevle.',
+      'Smør 2–3 ss tomatsaus tynt utover deigen.',
+      'Riv fersk mozzarella i biter og fordel over sausen.',
+      'Skyv pizzaen over på det brennhete pizzastålet med en pizzaspade.',
+      'Stek i 5–8 minutter til osten bobler og kanten har fått mørke, sprø flekker.',
+      'Topp med ferske basilikumblader og ringle litt ekstra virgin olivenolje over rett før servering.'
+    ],
+    ingredients: [
+      { name: '2 stk ferdig hevede pizzadeigballer (tipo 00 mel)' },
+      { name: '1 boks San Marzano-tomater (400g)' },
+      { name: '250 g fersk mozzarella (fior di latte)' },
+      { name: '1 potte fersk basilikum' },
+      { name: '2 ss ekstra virgin olivenolje' },
+      { name: '1 ts havsalt' }
+    ],
+    created_at: '2025-01-18T12:00:00Z'
+  },
+  {
+    id: 'curated-10',
+    title: 'Kremet Pasta Carbonara (Tradisjonell Roma-stil)',
+    description: 'Ekte italiensk carbonara uten fløte! Laget med sprøstekt guanciale eller pancetta, eggeplommer, pecorino romano og grovkvernet pepper.',
+    difficulty: 'Medium',
+    category: 'Dinner',
+    prep_time_minutes: 10,
+    cook_time_minutes: 12,
+    servings: 2,
+    tags: ['Middag', 'Pasta', 'Italiensk', 'Klassiker', 'Hurtig (<20 min)'],
+    cover_image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Kok spaghettien i en stor kjele med moderat saltet vann (guancialen er salt i seg selv).',
+      'Skjær guanciale eller pancetta i jevne terninger eller staver.',
+      'Stek kjøttet i en tørr, middels varm stekepanne til det er sprøtt og fettet har smeltet ut. Trekk pannen av varmen.',
+      'I en bolle: Pisk sammen eggeplommene, det hele egget, finrevet pecorino og rikelig med nykvernet sort pepper.',
+      'Ta vare på 1 dl av det stivelsesrike pastavannet rett før du siler av pastaen.',
+      'Ha den varme spaghettien direkte over i pannen med det sprøstekte kjøttet og vend godt sammen.',
+      'Hell i egg- og osteblandingen mens du rører kontinuerlig. Tilsett 2–4 ss pastavann for å emulgere sausen til en blank, silkemyk krem.',
+      'Pass på at pannen ikke er for varm slik at eggene ikke koagulerer til eggerøre.',
+      'Server umiddelbart med ekstra pecorino og sort pepper på toppen.'
+    ],
+    ingredients: [
+      { name: '250 g spaghetti eller rigatoni' },
+      { name: '150 g guanciale eller god pancetta/bacon' },
+      { name: '3 stk eggeplommer' },
+      { name: '1 stk helt egg' },
+      { name: '60 g Pecorino Romano (eller Parmesan), finrevet' },
+      { name: '1.5 ts grovkvernet sort pepper' }
+    ],
+    created_at: '2025-01-19T12:00:00Z'
+  },
+  {
+    id: 'curated-11',
+    title: 'Kremet Steinsopprisotto med Parmesan',
+    description: 'Fløyelsmyk norditaliensk risotto med tørket eller fersk steinsopp, sjalottløk, hvitvin og rikelig med smør og parmesan.',
+    difficulty: 'Medium',
+    category: 'Dinner',
+    prep_time_minutes: 10,
+    cook_time_minutes: 25,
+    servings: 3,
+    tags: ['Middag', 'Italiensk', 'Risotto', 'Vegetar', 'Gourmet'],
+    cover_image: 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Legg tørket sopp i lunkent vann i 15 minutter hvis du bruker tørket sopp. Spar på bløtleggingsvannet.',
+      'Hold grønnsaks- eller kyllingbuljongen rykende varm i en kjele på svak varme.',
+      'Fres finhakket sjalottløk og hvitløk i 2 ss smør i en tykkbunnet kjele til løken er myk og blank.',
+      'Tilsett arboriorisen og rør rundt i 2 minutter til riskornene blir blanke og gjennomsiktige.',
+      'Hell over hvitvinen og la den koke nesten helt inn under omrøring.',
+      'Spe med én øse varm buljong av gangen. Rør jevnlig og vent til væsken er absorbert før du sper på med mer.',
+      'Stek soppen gyllen i en egen panne med litt smør og vend inn i risottoen halvveis i koketiden.',
+      'Etter ca. 18 minutter skal risen være kremet, men ha et lite bitt i kjernen (al dente).',
+      'Trekk kjelen av varmen. Rør kraftig inn 2 ss kaldt smør og ferskrevet parmesan (mantecatura).',
+      'Smak til med salt, pepper og noen dråper sitron. Server med det samme.'
+    ],
+    ingredients: [
+      { name: '300 g arborio- eller carnaroliris' },
+      { name: '250 g fersk sopp eller 30g tørket steinsopp' },
+      { name: '2 stk sjalottløk, finhakket' },
+      { name: '1 fedd hvitløk, finhakket' },
+      { name: '1 dl tørr hvitvin' },
+      { name: '9 dl varm grønnsaksbuljong' },
+      { name: '4 ss meierismør' },
+      { name: '70 g parmesanost, ferskrevet' },
+      { name: '1 neve fersk persille' }
+    ],
+    created_at: '2025-01-20T12:00:00Z'
+  },
+
+  // --- 4. Asiatisk & Bowls ---
+  {
+    id: 'curated-12',
+    title: 'Kremet Kylling Tikka Masala',
+    description: 'Møre biter av marinert kylling i en rik, krydret tomat- og fløtesaus med garam masala, ingefær og hvitløk. Nydelig med ferskt naanbrød.',
+    difficulty: 'Medium',
+    category: 'Dinner',
+    prep_time_minutes: 20,
+    cook_time_minutes: 25,
+    servings: 4,
+    tags: ['Middag', 'Indisk', 'Kylling', 'Gryte', 'Helgekos'],
+    cover_image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Bland yoghurt, revet ingefær, revet hvitløk, garam masala, spisskummen og chilipulver i en bolle.',
+      'Skjær kyllingfilet i munnfullstore biter og vend inn i marinaden. La marinere i minst 15 minutter.',
+      'Brun kyllingbitene på høy varme i en panne med litt olje til de får farge (trenger ikke være gjennomstekt ennå). Sett til side.',
+      'I en gryte: Smelt smør og fres finhakket løk i 5 minutter til den er myk og gyllen.',
+      'Rør inn tomatpuré, korianderfrø, gurkemeie og paprikapulver, og stek i 1 minutt for å vekke krydderne.',
+      'Hell i hakkede tomater og kyllingkraft, og la sausen småkoke i 15 minutter.',
+      'Bruk stavmikser hvis du vil ha sausen helt glatt og fløyelsmyk.',
+      'Hell i kremfløten, legg de brunede kyllingbitene i sausen, og la det trekke i 8–10 minutter til kyllingen er gjennomkokt.',
+      'Smak til med salt, litt brunt sukker og ferskpresset sitronsaft. Pynt med frisk koriander.'
+    ],
+    ingredients: [
+      { name: '600 g kyllingbryst i biter' },
+      { name: '1.5 dl gresk yoghurt (til marinering)' },
+      { name: '2 ss fersk ingefær, finrevet' },
+      { name: '4 fedd hvitløk, finrevet' },
+      { name: '2 ss garam masala' },
+      { name: '1 ts malt spisskummen' },
+      { name: '1 ts malt gurkemeie' },
+      { name: '1 boks hermetiske hakkede tomater (400g)' },
+      { name: '2 ss tomatpuré' },
+      { name: '2 dl kremfløte' },
+      { name: '2 ss smør' },
+      { name: '1 stk stor gul løk, finhakket' },
+      { name: '1 potte frisk koriander' }
+    ],
+    created_at: '2025-01-21T12:00:00Z'
+  },
+  {
+    id: 'curated-13',
+    title: 'Frisk Laks Poke Bowl med Ponzu og Mango',
+    description: 'Fersk salmalaks i terninger marinert i ponzusaus, servert over lun sushiris med moden mango, edamamebønner, avokado og chilimajones.',
+    difficulty: 'Easy',
+    category: 'Dinner',
+    prep_time_minutes: 20,
+    cook_time_minutes: 15,
+    servings: 2,
+    tags: ['Middag', 'Lunsj', 'Fisk', 'Asiatisk', 'Sunn', 'Bowl'],
+    cover_image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Skyll sushirisen godt i kaldt vann og kok den etter anvisning på pakken. Vend inn en skvett riseddik og sukker.',
+      'Skjær fersk laks (salmalaks) i fine terninger på ca. 1.5 cm.',
+      'I en skål: Rør sammen soyasaus, limesaft, sesamolje og litt ferskrevet ingefær. Vend lakseterningene i marinaden.',
+      'Skjær mango og avokado i terninger. Tine frosne edamamebønner i varmt vann.',
+      'Fordel den lune risen i to romslige boller.',
+      'Arranger marinert laks, mangoterninger, avokado, edamamebønner og tynne agurkskiver i fine seksjoner over risen.',
+      'Ringle over srirachamajones eller chilimajones, og dryss med ristede sesamfrø og finsnittet vårløk.'
+    ],
+    ingredients: [
+      { name: '300 g fersk laks av sushikvalitet (f.eks. Salma)' },
+      { name: '2 dl sushiris eller jasminris' },
+      { name: '1 stk moden mango' },
+      { name: '1 stk moden avokado' },
+      { name: '150 g edamamebønner (uten belg)' },
+      { name: '0.5 stk slangeagurk, i tynne skiver' },
+      { name: '3 ss soyasaus' },
+      { name: '1 ss fersk limesaft' },
+      { name: '1 ts sesamolje' },
+      { name: '2 ss chilimajones' },
+      { name: '1 ss ristede sesamfrø' },
+      { name: '2 stilker vårløk' }
+    ],
+    created_at: '2025-01-22T12:00:00Z'
+  },
+  {
+    id: 'curated-14',
+    title: 'Autentisk Pad Thai med Kylling og Peanøtter',
+    description: 'Thailands mest berømte gaterett: Stekte risnudler med kylling, egg, bønnespirer og vårløk i en perfekt balansert søt, syrlig og salt tamarindsaus.',
+    difficulty: 'Medium',
+    category: 'Dinner',
+    prep_time_minutes: 15,
+    cook_time_minutes: 10,
+    servings: 2,
+    tags: ['Middag', 'Asiatisk', 'Nudler', 'Kylling', 'Hurtig (<20 min)'],
+    cover_image: 'https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Legg risnudlene i bløt i lunkent vann i ca. 20–30 minutter til de er bøyelige, men fortsatt har motstand.',
+      'Pisk sammen tamarindpaste (eller limesaft), fiskesaus, brunt sukker og litt soyasaus i en skål.',
+      'Varm 2 ss nøytral olje i en wok på høy varme. Stek kyllingstrimler og hakket hvitløk i 3 minutter til kjøttet er gyllent.',
+      'Skyv kyllingen til siden av pannen. Knekk eggene rett i pannen og rør rundt til de koagulerer som eggerøre.',
+      'Tilsett de bløtlagte risnudlene og hell over sausen. Wok kraftig i 2–3 minutter til nudlene trekker til seg væsken og blir myke og seige.',
+      'Vend inn bønnespirer og snittet vårløk de siste 30 sekundene.',
+      'Løft over på tallerkener og server med grovhakkede ristede peanøtter, ekstra chiliflak og ferske limebåter.'
+    ],
+    ingredients: [
+      { name: '180 g flate risnudler (Pad Thai nudler)' },
+      { name: '250 g kyllingbryst i tynne strimler' },
+      { name: '2 stk egg' },
+      { name: '2 fedd hvitløk, finhakket' },
+      { name: '100 g ferske bønnespirer' },
+      { name: '3 stilker vårløk i 3 cm biter' },
+      { name: '2 ss tamarindpaste eller 2 ss fersk limesaft' },
+      { name: '2.5 ss fiskesaus' },
+      { name: '2 ss brunt sukker' },
+      { name: '4 ss ristede usaltede peanøtter, grovhakket' },
+      { name: '1 stk lime i båter' },
+      { name: '2 ss nøytral olje' }
+    ],
+    created_at: '2025-01-23T12:00:00Z'
+  },
+
+  // --- 5. Vegetar, Supper & Sunt ---
+  {
+    id: 'curated-15',
+    title: 'Kremet Blomkålsuppe med Sprøstekt Bacon og Gresskarkjerner',
+    description: 'En fløyelsmyk, hvit suppe på ferskt blomkålhode, hvitløk og fløte, toppet med sprøstekt bacon eller ristede gresskarkjerner.',
+    difficulty: 'Easy',
+    category: 'Lunch',
+    prep_time_minutes: 10,
+    cook_time_minutes: 20,
+    servings: 4,
+    tags: ['Lunsj', 'Middag', 'Suppe', 'Sunn', 'Hverdagsmat'],
+    cover_image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Del blomkålen i små buketter. Hold av noen små, fine buketter til garnityr.',
+      'Finhakk løk og hvitløk.',
+      'Smelt smør i en gryte og fres løk og hvitløk blank på middels varme.',
+      'Ha i blomkålbukettene og hell over kylling- eller grønnsaksbuljong så det dekker.',
+      'Kok opp og la det småkoke i ca. 15 minutter til blomkålen er helt mør.',
+      'Kjør suppen helt glatt og fløyelsmyk med en stavmikser.',
+      'Rør inn fløten og varm opp til kokepunktet. Smak til med salt, hvit pepper og litt muskatnøtt.',
+      'Stek baconbiter og de ekstra blomkålbukettene sprø i en liten panne.',
+      'Hell suppen i dype skåler og pynt med sprøstekt bacon, ristede gresskarkjerner og noen dråper god olivenolje.'
+    ],
+    ingredients: [
+      { name: '1 stk stort ferskt blomkålhode' },
+      { name: '1 stk gul løk' },
+      { name: '2 fedd hvitløk' },
+      { name: '2 ss smør' },
+      { name: '8 dl grønnsaks- eller kyllingbuljong' },
+      { name: '2 dl kremfløte' },
+      { name: '100 g bacon i terninger (kan sløyfes for vegetar)' },
+      { name: '2 ss gresskarkjerner' },
+      { name: '1 klype revet muskatnøtt' },
+      { name: '1 ts salt og kvernet hvit pepper' }
+    ],
+    created_at: '2025-01-24T12:00:00Z'
+  },
+  {
+    id: 'curated-16',
+    title: 'Indisk Rød Linsedahl med Kokosmelk og Spinat',
+    description: 'Varmende, fyldig og mettende plantebasert hverdagsgryte med røde linser, ingefær, kokosmelk og fersk spinat.',
+    difficulty: 'Easy',
+    category: 'Vegan',
+    prep_time_minutes: 10,
+    cook_time_minutes: 20,
+    servings: 4,
+    tags: ['Middag', 'Vegansk', 'Vegetar', 'Sunn', 'Indisk', 'Gryte'],
+    cover_image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Skyll de røde linsene godt i kaldt vann i en sil.',
+      'Varm olje i en kjele og fres finhakket løk, hvitløk, revet ingefær og chili i 3 minutter.',
+      'Rør inn garam masala, spisskummen, gurkemeie og tomatpuré, og stek i 1 minutt.',
+      'Tilsett de skylte linsene, hakkede tomater, kokosmelk og grønnsaksbuljong.',
+      'Kok opp, skru ned til lav varme, og la det småkoke under lokk i 18–20 minutter til linsene er myke og sausen er tykk og kremet.',
+      'Vend inn fersk spinat de siste 2 minuttene til den faller sammen.',
+      'Smak til med salt, pepper og fersk limesaft.',
+      'Server med dampet basmatiris og gjerne varme naanbrød.'
+    ],
+    ingredients: [
+      { name: '250 g tørkede røde linser' },
+      { name: '1 boks fyldig kokosmelk (400ml)' },
+      { name: '1 boks hakkede tomater (400g)' },
+      { name: '4 dl grønnsaksbuljong' },
+      { name: '1 stk gul løk, finhakket' },
+      { name: '3 fedd hvitløk, revet' },
+      { name: '1 ss fersk ingefær, revet' },
+      { name: '1 ss garam masala' },
+      { name: '1 ts malt spisskummen' },
+      { name: '1 ts gurkemeie' },
+      { name: '80 g fersk spinat' },
+      { name: '1 stk lime, saften' },
+      { name: '1 ts salt' }
+    ],
+    created_at: '2025-01-25T12:00:00Z'
+  },
+
+  // --- 6. Frokost, Lunsj & Kvelds ---
+  {
+    id: 'curated-17',
+    title: 'Amerikanske Fluffy Pannekaker med Lønnesirup',
+    description: 'Tykke, luftige og gyldne pannekaker som smelter på tungen. Serveres med en god klatt smør, blåbær og ekte lønnesirup.',
+    difficulty: 'Easy',
+    category: 'Breakfast',
+    prep_time_minutes: 10,
+    cook_time_minutes: 15,
+    servings: 4,
+    tags: ['Frokost', 'Brunch', 'Kos', 'Helgefrokost'],
+    cover_image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Bland hvetemel, sukker, bakepulver, natron og salt i en stor bakebolle.',
+      'I en annen bolle: Pisk sammen kulturmelk (eller vanlig melk med en ts sitron), egg og smeltet smør.',
+      'Hell det våte over det tørre og rør forsiktig sammen med en visp eller slikkepott. Ikke rør for mye – små klumper i røren gjør pannekakene ekstra luftige!',
+      'La røren hvile på benken i 5–10 minutter.',
+      'Varm en stekepanne på middels varme med litt smør.',
+      'Hell i ca. 0.5 dl røre per pannekake. Stek til det danner seg små bobler på oversiden (ca. 2 minutter).',
+      'Snu forsiktig og stek den andre siden gyllenbrun i 1–2 minutter.',
+      'Bygg et høyt tårn på tallerkenen, legg en generøs klatt meierismør på toppen, og hell rikelig med lønnesirup over.'
+    ],
+    ingredients: [
+      { name: '3 dl hvetemel' },
+      { name: '2 ss sukker' },
+      { name: '2 ts bakepulver' },
+      { name: '0.5 ts natron' },
+      { name: '0.5 ts salt' },
+      { name: '3 dl kulturmelk eller helmelk' },
+      { name: '1 stk stort egg' },
+      { name: '3 ss meierismør, smeltet' },
+      { name: '4 ss ekte lønnesirup til servering' },
+      { name: '1 boks ferske blåbær' }
+    ],
+    created_at: '2025-01-26T12:00:00Z'
+  },
+  {
+    id: 'curated-18',
+    title: 'Kremet Havregrynsgrøt med Eple, Kanel og Mandelsmør',
+    description: 'En næringsrik og lun start på dagen: Lettkokte havregryn kokt på melk og vann, toppet med karamellisert eple, kanel og nøttesmør.',
+    difficulty: 'Easy',
+    category: 'Breakfast',
+    prep_time_minutes: 5,
+    cook_time_minutes: 5,
+    servings: 1,
+    tags: ['Frokost', 'Sunn', 'Hurtig (<20 min)', 'Vegetar'],
+    cover_image: 'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Ha havregryn, melk, vann og en klype salt i en liten kjele.',
+      'Kok opp under omrøring på middels varme, og la grøten småkoke i 3–5 minutter til den blir tykk og kremet.',
+      'I en liten panne ved siden av: Stek eplebiter raskt i 1 ts smør med en klype kanel og honning i 2 minutter.',
+      'Hell den varme grøten over i en dyp skål.',
+      'Topp med de varme eplebitene, en skje mandelsmør eller peanøttsmør, og dryss med litt ekstra kanel.'
+    ],
+    ingredients: [
+      { name: '1.5 dl store eller lettkokte havregryn' },
+      { name: '1.5 dl melk (eller havremelk)' },
+      { name: '1.5 dl vann' },
+      { name: '1 klype salt' },
+      { name: '1 stk syrlig eple, i terninger' },
+      { name: '1 ts malt kanel' },
+      { name: '1 ss mandelsmør eller peanøttsmør' },
+      { name: '1 ts flytende honning' }
+    ],
+    created_at: '2025-01-27T12:00:00Z'
+  },
+
+  // --- 7. Bakst & Desserter ---
+  {
+    id: 'curated-19',
+    title: 'Saftige Norske Kanelboller (Skillingsboller)',
+    description: 'Myke, luftige hveteboller med rikelig med smør-, kanel- og sukkerfyll. Duften som sprer seg på kjøkkenet er uslåelig.',
+    difficulty: 'Medium',
+    category: 'Baking',
+    prep_time_minutes: 30,
+    cook_time_minutes: 12,
+    servings: 16,
+    tags: ['Bakst', 'Kos', 'Norsk tradisjon', 'Søtt'],
+    cover_image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Varm melken til den er lunken (ca. 37°C) og rør ut fersk gjær.',
+      'I en eltebolle: Bland mel, sukker, kardemomme og salt. Hell i melkeblandingen og ett sammenvispet egg.',
+      'Elt deigen i kjøkkenmaskin på lav hastighet i ca. 10 minutter.',
+      'Kutt romtemperert smør i terninger og tilsett litt etter litt mens maskinen elter i ytterligere 5 minutter til deigen er elastisk og slipper bollen.',
+      'Dekk bollen med plast og la heve på et lunt sted i ca. 60 minutter til dobbel størrelse.',
+      'Rør sammen mykt smør, sukker og kanel til fyllet.',
+      'Kjevle deigen ut til et stort rektangel (ca. 40x50 cm) og smør fyllet jevnt utover.',
+      'Rull deigen stramt sammen til en pølse og skjær i ca. 16 like store skiver.',
+      'Sett bollene på et bakepapirkledd stekebrett, dekk til, og etterhev i 30–40 minutter.',
+      'Pensle bollene forsiktig med sammenvispet egg og dryss eventuelt med perlesukker.',
+      'Stek midt i ovnen på 220°C over- og undervarme i ca. 10–12 minutter til de er gyllenbrune. Avkjøl på rist.'
+    ],
+    ingredients: [
+      { name: '500 g hvetemel' },
+      { name: '1 dl sukker' },
+      { name: '2 ts malt kardemomme' },
+      { name: '0.5 ts salt' },
+      { name: '3 dl melk' },
+      { name: '25 g fersk gjær (eller 0.5 pk tørrgjær)' },
+      { name: '1 stk egg (til deig og pensling)' },
+      { name: '75 g meierismør i terninger' },
+      { name: '80 g romtemperert smør (til fyll)' },
+      { name: '4 ss sukker eller brunt sukker (til fyll)' },
+      { name: '2 ss malt kanel (til fyll)' }
+    ],
+    created_at: '2025-01-28T12:00:00Z'
+  },
+  {
+    id: 'curated-20',
+    title: 'Eltefritt Grytebrød med Sprø Skorpe',
+    description: 'Et fantastisk luftig surdeigslignende grytebrød med store bobler og glassaktig sprø skorpe. Krever null elting!',
+    difficulty: 'Easy',
+    category: 'Baking',
+    prep_time_minutes: 10,
+    cook_time_minutes: 45,
+    servings: 10,
+    tags: ['Bakst', 'Brød', 'Gryte', 'Enkelt', 'Klassiker'],
+    cover_image: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=1000&q=80',
+    instructions: [
+      'Rør sammen mel, salt og tørrgjær i en bolle.',
+      'Hell over kaldt vann og rør raskt sammen med en sleiv til alt melet er fuktet (deigen skal være klissete).',
+      'Dekk bollen med plast og la den heve på kjøkkenbenken i 12–18 timer (f.eks. over natten).',
+      'Neste dag: Hell deigen ut på et godt melet bakepapir. Brett deigen inn mot midten fra fire kanter med en slikkepott.',
+      'La deigen etterheve under et klede i 2 timer.',
+      'Sett en støpejernsgryte med lokk inn i ovnen og forvarm til 245°C.',
+      'Løft den rykende varme gryta forsiktig ut av ovnen. Løft deigen (med bakepapiret eller vipp deigen nedi) over i gryta. Sett på lokk.',
+      'Stek med lokk i 30 minutter. Ta av lokket, senk temperaturen til 220°C, og stek videre i 15 minutter til skorpen er dyp gyllen og sprø.',
+      'Vipp brødet ut på en rist og la det avkjøles helt før du skjærer i det.'
+    ],
+    ingredients: [
+      { name: '500 g hvetemel (eller 400g siktet + 100g sammalt)' },
+      { name: '1.5 ts salt' },
+      { name: '0.25 ts tørrgjær (en liten knivsodd)' },
+      { name: '4 dl kaldt vann' }
+    ],
+    created_at: '2025-01-29T12:00:00Z'
+  }
+];
+
+export const ALL_CURATED_CATALOG: Recipe[] = [...INITIAL_RECIPES, ...CURATED_LIBRARY];
+

@@ -22,6 +22,7 @@ export interface Recipe {
   notes?: string;
   is_favorite?: boolean;
   created_at: string;
+  source_url?: string;
 }
 
 export interface ShoppingItem {
@@ -31,4 +32,19 @@ export interface ShoppingItem {
   recipeTitle?: string;
 }
 
-export type ViewMode = 'view-dashboard' | 'view-recipe-form' | 'view-recipe-detail' | 'view-shopping-list';
+export interface MealPlanDay {
+  dayName: 'Mandag' | 'Tirsdag' | 'Onsdag' | 'Torsdag' | 'Fredag' | 'Lørdag' | 'Søndag';
+  recipeId?: string | null;
+  recipeTitle?: string | null;
+  note?: string;
+}
+
+export type MealPlan = Record<string, MealPlanDay>;
+
+export type ViewMode =
+  | 'view-dashboard'
+  | 'view-explore'
+  | 'view-meal-planner'
+  | 'view-recipe-form'
+  | 'view-recipe-detail'
+  | 'view-shopping-list';

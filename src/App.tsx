@@ -1,27 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Recipe, ViewMode, ShoppingItem } from './types';
+import { Recipe, ViewMode, ShoppingItem, MealPlan } from './types';
 import { INITIAL_RECIPES } from './data/sampleRecipes';
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
+import { ExploreView } from './components/ExploreView';
+import { MealPlannerView } from './components/MealPlannerView';
 import { RecipeFormView } from './components/RecipeFormView';
 import { RecipeDetailView } from './components/RecipeDetailView';
 import { ShoppingListView } from './components/ShoppingListView';
 import { CookingModeModal } from './components/CookingModeModal';
 import { KitchenTimer } from './components/KitchenTimer';
+import { RecipeImporterModal } from './components/RecipeImporterModal';
 
 const STORAGE_KEY = 'recipebox_recipes';
 const SHOPPING_STORAGE_KEY = 'recipebox_shopping_list';
+const MEALPLAN_STORAGE_KEY = 'recipebox_mealplan';
 
 export const App: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
+  const [mealPlan, setMealPlan] = useState<MealPlan>({});
   const [currentView, setCurrentView] = useState<ViewMode>('view-dashboard');
   const [currentRecipeId, setCurrentRecipeId] = useState<string | null>(null);
+
+  // Partial recipe from importer to prefill form
+  const [importedRecipeDraft, setImportedRecipeDraft] = useState<Partial<Recipe> | null>(null);
 
   // Modals & Cooking Mode State
   const [isTimerOpen, setIsTimerOpen] = useState(false);
   const [isCookingModeOpen, setIsCookingModeOpen] = useState(false);
+  const [isImporterOpen, setIsImporterOpen] = useState(false);
   const [cookingServings, setCookingServings] = useState(4);
 
   // Initialize theme
@@ -54,7 +63,6 @@ export const App: React.FC = () => {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_RECIPES));
         }
       } else {
-        // First visit: populate rich starter recipes
         setRecipes(INITIAL_RECIPES);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_RECIPES));
       }
@@ -76,6 +84,18 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  // Initialize meal plan from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(MEALPLAN_STORAGE_KEY);
+      if (stored) {
+        setMealPlan(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error('Failed to load meal plan:', e);
+    }
+  }, []);
+
   const persistRecipes = (updated: Recipe[]) => {
     setRecipes(updated);
     try {
@@ -94,10 +114,19 @@ export const App: React.FC = () => {
     }
   };
 
-  // Restore or reload example recipes
+  const persistMealPlan = (updated: MealPlan) => {
+    setMealPlan(updated);
+    try {
+      localStorage.setItem(MEALPLAN_STORAGE_KEY, JSON.stringify(updated));
+    } catch (err) {
+      console.error('Failed to save meal plan:', err);
+    }
+  };
+
+  // Restore example recipes
   const handleRestoreExamples = () => {
     const confirmReset = window.confirm(
-      'Vil du laste inn de 8 originale eksempeloppskriftene? Dette vil tilbakestille eller oppdatere oppskriftssamlingen din.'
+      'Vil du laste inn de 8 originale eksempeloppskriftene? Dette vil tilbakestille samlingen din.'
     );
     if (!confirmReset) return;
 
@@ -121,12 +150,14 @@ export const App: React.FC = () => {
   };
 
   const handleOpenAdd = () => {
+    setImportedRecipeDraft(null);
     setCurrentRecipeId(null);
     setCurrentView('view-recipe-form');
   };
 
   const handleOpenEdit = () => {
     if (currentRecipeId) {
+      setImportedRecipeDraft(null);
       setCurrentView('view-recipe-form');
     }
   };
@@ -156,7 +187,32 @@ export const App: React.FC = () => {
       };
       persistRecipes([newRecipe, ...recipes]);
     }
+    setImportedRecipeDraft(null);
     setCurrentView('view-dashboard');
+  };
+
+  // Direct addition of recipe from Explore or Importer
+  const handleAddRecipeDirectly = (recipe: Recipe) => {
+    const alreadyExists = recipes.some(
+      (r) => r.id === recipe.id || r.title.toLowerCase().trim() === recipe.title.toLowerCase().trim()
+    );
+    if (alreadyExists) return;
+
+    const recipeWithId: Recipe = {
+      ...recipe,
+      id: recipe.id.startsWith('curated-') || recipe.id.startsWith('imported-') || recipe.id.startsWith('mealdb-')
+        ? recipe.id
+        : `recipe-${Date.now()}`,
+      created_at: recipe.created_at || new Date().toISOString()
+    };
+    persistRecipes([recipeWithId, ...recipes]);
+  };
+
+  // Open recipe in form from Importer
+  const handleOpenImportedInForm = (partial: Partial<Recipe>) => {
+    setImportedRecipeDraft(partial);
+    setCurrentRecipeId(null);
+    setCurrentView('view-recipe-form');
   };
 
   // Delete recipe
@@ -201,30 +257,6 @@ export const App: React.FC = () => {
     }
   };
 
-  // Import JSON
-  const handleImportRecipe = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const importedRecipe = JSON.parse(event.target?.result as string);
-        importedRecipe.id = Date.now().toString();
-        importedRecipe.created_at = new Date().toISOString();
-
-        const updated = [importedRecipe, ...recipes];
-        persistRecipes(updated);
-        setCurrentView('view-dashboard');
-        alert(`Oppskrift "${importedRecipe.title || 'Uten tittel'}" importert!`);
-      } catch (err) {
-        console.error('Error importing recipe:', err);
-        alert('Kunne ikke importere oppskriften. Er du sikker på at filen er en gyldig oppskrift?');
-      }
-    };
-    reader.readAsText(file);
-  };
-
   // Shopping List handlers
   const handleAddAllToShoppingList = (ingredients: string[], recipeTitle: string) => {
     const newItems: ShoppingItem[] = ingredients.map((text) => ({
@@ -234,6 +266,10 @@ export const App: React.FC = () => {
       recipeTitle,
     }));
     persistShoppingList([...shoppingList, ...newItems]);
+  };
+
+  const handleAppendShoppingItems = (items: ShoppingItem[]) => {
+    persistShoppingList([...shoppingList, ...items]);
   };
 
   const handleToggleShoppingItem = (id: string) => {
@@ -282,7 +318,7 @@ export const App: React.FC = () => {
         shoppingItemCount={uncheckedShoppingCount}
         onNavigate={(v) => setCurrentView(v)}
         onAddRecipe={handleOpenAdd}
-        onImportRecipe={handleImportRecipe}
+        onOpenImporterModal={() => setIsImporterOpen(true)}
         onOpenTimer={() => setIsTimerOpen(true)}
         theme={theme}
         onToggleTheme={toggleTheme}
@@ -296,18 +332,54 @@ export const App: React.FC = () => {
             onAddRecipe={handleOpenAdd}
             onToggleFavorite={handleToggleFavorite}
             onRestoreExamples={handleRestoreExamples}
+            onNavigateToExplore={() => setCurrentView('view-explore')}
+            onOpenImporterModal={() => setIsImporterOpen(true)}
+          />
+        )}
+
+        {currentView === 'view-explore' && (
+          <ExploreView
+            savedRecipes={recipes}
+            onAddRecipeToCookbook={handleAddRecipeDirectly}
+            onViewRecipeDetail={(r) => {
+              // If already in recipes, select it directly
+              const existing = recipes.find(
+                (saved) => saved.title.toLowerCase().trim() === r.title.toLowerCase().trim()
+              );
+              if (existing) {
+                setCurrentRecipeId(existing.id);
+              } else {
+                // Temporarily add so detail view can inspect it
+                handleAddRecipeDirectly(r);
+                setCurrentRecipeId(r.id);
+              }
+              setCurrentView('view-recipe-detail');
+            }}
+            onOpenImporter={() => setIsImporterOpen(true)}
+          />
+        )}
+
+        {currentView === 'view-meal-planner' && (
+          <MealPlannerView
+            recipes={recipes}
+            mealPlan={mealPlan}
+            onUpdateMealPlan={persistMealPlan}
+            onAddIngredientsToShoppingList={handleAppendShoppingItems}
+            onViewRecipeDetail={handleSelectRecipe}
+            onNavigateToShoppingList={() => setCurrentView('view-shopping-list')}
           />
         )}
 
         {currentView === 'view-recipe-form' && (
           <RecipeFormView
-            recipeToEdit={selectedRecipe}
+            recipeToEdit={importedRecipeDraft || selectedRecipe}
             onSave={handleSaveRecipe}
-            onCancel={() =>
+            onCancel={() => {
+              setImportedRecipeDraft(null);
               setCurrentView(
                 currentRecipeId ? 'view-recipe-detail' : 'view-dashboard'
-              )
-            }
+              );
+            }}
           />
         )}
 
@@ -342,6 +414,14 @@ export const App: React.FC = () => {
       <KitchenTimer
         isOpen={isTimerOpen}
         onClose={() => setIsTimerOpen(false)}
+      />
+
+      {/* Recipe Importer Modal */}
+      <RecipeImporterModal
+        isOpen={isImporterOpen}
+        onClose={() => setIsImporterOpen(false)}
+        onSaveRecipe={handleAddRecipeDirectly}
+        onOpenInForm={handleOpenImportedInForm}
       />
 
       {/* Step-by-Step Cooking Focus Mode */}
